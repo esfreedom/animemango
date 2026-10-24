@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "title": "AnimeHub: Airing schedule, updates and anime community",
+    "description": "Anime airing schedules, where to watch in Thailand, dub and subtitle info, and multilingual episode threads."
+  },
+  "nav": {
+    "label": "Main menu",
+    "skip": "Skip to main content",
+    "home": "Home",
+    "schedule": "Schedule",
+    "season": "Season",
+    "search": "Search",
+    "soon": "Coming soon"
+  },
+  "theme": {
+    "toggle": "Toggle light or dark theme"
+  },
+  "locale": {
+    "label": "Language",
+    "th": "ไทย",
+    "en": "English",
+    "ja": "日本語"
+  },
+  "footer": {
+    "about": "About",
+    "terms": "Terms of Use",
+    "privacy": "Privacy Policy",
+    "report": "Report removal",
+    "copyright": "Anime information is based on public sources and rights holders. This site does not host anime episodes."
+  },
+  "home": {
+    "title": "Anime today",
+    "subtitle": "Airing schedules, official announcements, and changes to where you can watch in Thailand, shown in Thai time.",
+    "sections": {
+      "airingToday": "Airing today",
+      "upcoming": "Airing soon",
+      "announcements": "Official announcements",
+      "availabilityChanges": "Recent availability changes",
+      "hotThreads": "Popular threads"
+    },
+    "empty": "Data is being prepared"
+  }
+}

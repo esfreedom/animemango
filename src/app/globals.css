@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens. Dark is the default theme; `data-theme="light"` on <html>
+ * switches to the light palette. Components use the Tailwind names mapped below
+ * (bg-canvas, text-ink, border-line, ...), never raw hex values.
+ */
+:root {
+  color-scheme: dark;
+  --c-canvas: #0b0d12;
+  --c-surface: #141823;
+  --c-raised: #1c2130;
+  --c-line: #2a3142;
+  --c-ink: #f2f4f8;
+  --c-muted: #9aa3b5;
+  --c-accent: #ff6b8b;
+  --c-on-accent: #140a0e;
+  --c-focus: #7dd3fc;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --c-canvas: #f6f7fb;
+  --c-surface: #ffffff;
+  --c-raised: #eef0f6;
+  --c-line: #d9deea;
+  --c-ink: #141823;
+  --c-muted: #5b6478;
+  --c-accent: #d6336c;
+  --c-on-accent: #ffffff;
+  --c-focus: #0369a1;
+}
+
+@theme inline {
+  --color-canvas: var(--c-canvas);
+  --color-surface: var(--c-surface);
+  --color-raised: var(--c-raised);
+  --color-line: var(--c-line);
+  --color-ink: var(--c-ink);
+  --color-muted: var(--c-muted);
+  --color-accent: var(--c-accent);
+  --color-on-accent: var(--c-on-accent);
+  --color-focus: var(--c-focus);
+
+  --font-sans: var(--font-latin), var(--font-thai), var(--font-jp), ui-sans-serif,
+    system-ui, sans-serif;
+}
+
+body {
+  background: var(--c-canvas);
+  color: var(--c-ink);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
