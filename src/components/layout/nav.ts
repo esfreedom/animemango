@@ -1,7 +1,9 @@
-// `ready` routes exist; the others render as "coming soon" until their phase ships.
+// Order matters: the mobile bottom bar shows the first four entries. The season link
+// goes through /season/current, which redirects to the current season, so the header
+// stays static and does not read the clock.
 export const navItems = [
-  { key: "home", href: "/", ready: true },
-  { key: "schedule", href: "/schedule", ready: false },
-  { key: "season", href: "/season", ready: false },
-  { key: "search", href: "/search", ready: false },
+  { key: "home", href: "/" },
+  { key: "schedule", href: "/schedule" },
+  { key: "season", href: "/season/current" },
+  { key: "search", href: "/search" },
 ] as const;

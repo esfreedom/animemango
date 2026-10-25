@@ -10,7 +10,20 @@
     "schedule": "Schedule",
     "season": "Season",
     "search": "Search",
-    "soon": "Coming soon"
+    "soon": "Coming soon",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "admin": "Admin"
+  },
+  "common": {
+    "back": "Back",
+    "notAvailable": "No data yet",
+    "source": "Source",
+    "more": "See all",
+    "signInFirst": "Sign in first to do this",
+    "pageNotFound": "We could not find that page"
   },
   "theme": {
     "toggle": "Toggle light or dark theme"
@@ -26,7 +39,19 @@
     "terms": "Terms of Use",
     "privacy": "Privacy Policy",
     "report": "Report removal",
-    "copyright": "Anime information is based on public sources and rights holders. This site does not host anime episodes."
+    "copyright": "Anime information is based on public sources and rights holders. This site does not host anime episodes.",
+    "attribution": "Some anime data is provided by AniList."
+  },
+  "lang": {
+    "th": "TH",
+    "en": "EN",
+    "ja": "JP",
+    "other": "Other",
+    "fallback": "No Thai text yet. Showing another language.",
+    "audio": "Audio",
+    "subs": "Subs",
+    "dubTh": "Thai dub",
+    "subTh": "Thai subs"
   },
   "home": {
     "title": "Anime today",
@@ -38,6 +63,235 @@
       "availabilityChanges": "Recent availability changes",
       "hotThreads": "Popular threads"
     },
-    "empty": "Data is being prepared"
+    "empty": "Nothing in this section yet",
+    "threadComments": "{count} comments"
+  },
+  "status": {
+    "upcoming": "Upcoming",
+    "airing": "Airing",
+    "finished": "Finished",
+    "hiatus": "On hiatus",
+    "scheduled": "Scheduled",
+    "aired": "Aired",
+    "delayed": "Delayed"
+  },
+  "availability": {
+    "title": "Where to watch in Thailand",
+    "added": "Added",
+    "changed": "Changed",
+    "removed": "Ended",
+    "none": "Not currently available on any known platform in Thailand",
+    "verifiedAt": "Last checked {date}",
+    "history": "Availability history",
+    "historyEmpty": "No history yet",
+    "visit": "Visit platform",
+    "stale": "Not confirmed for over 30 days"
+  },
+  "anime": {
+    "episodes": "Episodes",
+    "format": "Format",
+    "score": "Average score",
+    "genres": "Genres",
+    "startDate": "Started",
+    "synopsis": "Synopsis",
+    "noSynopsis": "No synopsis yet. Waiting for review.",
+    "trailers": "Trailers",
+    "noTrailers": "No trailers from verified official channels yet",
+    "episodeList": "All episodes",
+    "noEpisodes": "No episode schedule yet",
+    "watchOrder": "Watch order",
+    "votes": "{count} votes",
+    "vote": "Vote for this",
+    "unvote": "Remove vote",
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "followers": "{count} followers",
+    "shop": "Official merchandise",
+    "shopDisclosure": "Partner links: we may earn a commission when you buy through these links.",
+    "season": "Season"
+  },
+  "episode": {
+    "title": "Episode {number}",
+    "airsAt": "Airs",
+    "noTime": "No air time yet",
+    "scheduleHistory": "Schedule changes",
+    "scheduleHistoryEmpty": "The time has never changed",
+    "backToAnime": "Back to the title",
+    "moved": "Moved from {from} to {to}"
+  },
+  "comments": {
+    "title": "Comments",
+    "filter": "Show language",
+    "all": "All languages",
+    "empty": "No comments in this language yet",
+    "placeholder": "Write a comment (up to 2000 characters)",
+    "langTag": "Comment language",
+    "langAuto": "Detect automatically",
+    "post": "Post comment",
+    "reply": "Reply",
+    "report": "Report",
+    "reported": "Reported. Thank you.",
+    "reportReason": "Reason",
+    "signInToComment": "Sign in to join the discussion",
+    "locked": "This thread is closed to new comments",
+    "posted": "Comment posted",
+    "errors": {
+      "sign_in_required": "Please sign in first",
+      "invalid_body": "A comment must be 1 to 2000 characters",
+      "rate_limited": "Too many comments. Try again later",
+      "thread_locked": "This thread is closed to new comments",
+      "thread_not_found": "Thread not found",
+      "parent_not_found": "The comment you are replying to was not found",
+      "invalid_reason": "Please give a reason of at least 3 characters",
+      "generic": "Something went wrong. Please try again"
+    }
+  },
+  "schedule": {
+    "title": "Schedule",
+    "subtitle": "The next 7 days, in the time zone you choose",
+    "timezone": "Time zone",
+    "apply": "Show",
+    "empty": "No episodes in this period yet"
+  },
+  "season": {
+    "winter": "Winter",
+    "spring": "Spring",
+    "summer": "Summer",
+    "fall": "Fall",
+    "title": "{season} {year} anime",
+    "sortNote": "Sorted by votes, then score",
+    "empty": "No titles in this season yet",
+    "invalid": "Unknown season"
+  },
+  "search": {
+    "title": "Search anime",
+    "query": "Title",
+    "genre": "Genre",
+    "allGenres": "All genres",
+    "platform": "Platform",
+    "allPlatforms": "All platforms",
+    "thaiDub": "Has Thai dub",
+    "thaiSub": "Has Thai subs",
+    "submit": "Search",
+    "empty": "No titles match these filters"
+  },
+  "where": {
+    "title": "Watch on {platform}",
+    "subtitle": "Titles this platform has rights to in Thailand. Each shows when it was last checked.",
+    "empty": "No titles yet",
+    "invalid": "Unknown platform"
+  },
+  "watchOrder": {
+    "title": "Watch order for {title}",
+    "subtitle": "In recommended order. Entries with spoilers are hidden by default.",
+    "empty": "No watch order for this title yet",
+    "spoilerShow": "Show spoiler entries",
+    "spoilerNote": "Spoiler"
+  },
+  "guides": {
+    "title": "Guides",
+    "readMore": "Read more",
+    "updated": "Updated {date}",
+    "notTranslated": "This guide is not available in your language yet. Showing English."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "markAll": "Mark all as read",
+    "unread": "Unread",
+    "signIn": "Sign in to see your notifications"
+  },
+  "profile": {
+    "title": "{username}'s profile",
+    "joined": "Joined {date}",
+    "comments": "Recent comments",
+    "follows": "Following",
+    "empty": "Nothing yet",
+    "notFound": "No such user"
+  },
+  "login": {
+    "title": "Sign in",
+    "description": "Enter your email and we will send a sign-in link. No password needed.",
+    "email": "Email",
+    "send": "Send sign-in link",
+    "sent": "Link sent. Check your email.",
+    "errors": {
+      "invalid_email": "That email address does not look right",
+      "not_configured": "Sign-in is not configured yet",
+      "send_failed": "Could not send the link. Please try again"
+    }
+  },
+  "report": {
+    "title": "Report removal",
+    "description": "Use this form if you own the rights to content on this site or believe it infringes rights. Our team will review it and reply by email.",
+    "name": "Your name",
+    "email": "Contact email",
+    "url": "Link to the content on this site",
+    "reason": "Details",
+    "submit": "Send report",
+    "success": "Received. We will review it soon.",
+    "error": "Please fill in every field correctly"
+  },
+  "legal": {
+    "draft": "This is a draft awaiting legal review before official publication."
+  },
+  "admin": {
+    "title": "Admin",
+    "forbidden": "This page is for administrators only",
+    "drafts": "AI draft review queue",
+    "draftsEmpty": "No drafts waiting",
+    "approve": "Approve and publish",
+    "reject": "Reject",
+    "titleField": "Thai title",
+    "synopsisField": "Thai synopsis",
+    "reports": "Reported comments",
+    "reportsEmpty": "No reports",
+    "hide": "Hide",
+    "remove": "Remove",
+    "restore": "Restore",
+    "takedowns": "Takedown requests",
+    "takedownsEmpty": "No requests",
+    "markActioned": "Actioned",
+    "markRejected": "Reject request",
+    "channels": "Official channels allowed for trailers",
+    "channelId": "YouTube channel ID",
+    "channelName": "Channel name",
+    "evidenceUrl": "Evidence that it is official",
+    "addChannel": "Add channel",
+    "trailers": "Add trailer",
+    "youtubeId": "YouTube video ID",
+    "animeSlug": "Title slug",
+    "addTrailer": "Add trailer",
+    "availabilityTitle": "Availability",
+    "platformId": "Platform ID",
+    "region": "Region",
+    "audioLangs": "Audio (e.g. ja,en,th)",
+    "subLangs": "Subtitles (e.g. th,en)",
+    "sourceUrl": "Link that confirms the rights",
+    "addAvailability": "Save availability",
+    "endAvailability": "End availability",
+    "announcements": "Official announcements",
+    "headline": "Headline",
+    "summary": "Summary",
+    "sourceName": "Source name",
+    "publishedAt": "Published at",
+    "addAnnouncement": "Add announcement",
+    "watchOrderTitle": "Watch order",
+    "franchiseSlug": "Franchise slug",
+    "relatedSlug": "Related title slug",
+    "position": "Position",
+    "relation": "Relation (e.g. main story)",
+    "spoiler": "Contains spoilers",
+    "note": "Note",
+    "addWatchOrder": "Add entry",
+    "platforms": "Platforms",
+    "platformName": "Platform name",
+    "officialUrl": "Official website",
+    "addPlatform": "Add platform",
+    "done": "Saved",
+    "failed": "Could not save. Check the fields you entered"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again"
   }
 }

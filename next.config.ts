@@ -7,6 +7,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    // Posters and banners come from the AniList CDN, as returned by the API.
+    remotePatterns: [{ protocol: "https", hostname: "s4.anilist.co" }],
+  },
   turbopack: {
     resolveAlias: {
       "next-intl/config": "./src/i18n/request.ts",

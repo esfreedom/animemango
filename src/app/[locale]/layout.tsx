@@ -3,9 +3,9 @@ import { Inter, Noto_Sans_JP, Noto_Sans_Thai } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -31,6 +31,10 @@ const japanese = Noto_Sans_JP({
 
 // Applies the saved theme before first paint to avoid a light/dark flash.
 const themeScript = `(function(){try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t}}catch(e){}})();`;
+
+// Pages read the database per request (see preparePage), so the locale tree is
+// rendered at request time. Nothing that reads data runs during the build.
+export const instant = false;
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -78,7 +82,7 @@ export default async function LocaleLayout({
           >
             {t("skip")}
           </a>
-          <SiteHeader />
+          <SiteHeader locale={locale} />
           <main
             id="main"
             className="mx-auto w-full max-w-7xl flex-1 px-4 pb-24 pt-6 md:px-6 md:pb-12 md:pt-10"

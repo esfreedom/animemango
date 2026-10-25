@@ -10,7 +10,20 @@
     "schedule": "放送表",
     "season": "シーズン",
     "search": "検索",
-    "soon": "近日公開"
+    "soon": "近日公開",
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "notifications": "通知",
+    "profile": "プロフィール",
+    "admin": "管理"
+  },
+  "common": {
+    "back": "戻る",
+    "notAvailable": "まだ情報がありません",
+    "source": "出典",
+    "more": "すべて見る",
+    "signInFirst": "この操作にはログインが必要です",
+    "pageNotFound": "お探しのページが見つかりません"
   },
   "theme": {
     "toggle": "明るいテーマと暗いテーマを切り替え"
@@ -26,7 +39,19 @@
     "terms": "利用規約",
     "privacy": "プライバシーポリシー",
     "report": "削除申請",
-    "copyright": "アニメ情報は公開情報と権利者の情報に基づいています。本サイトはアニメ本編の動画をホストしていません。"
+    "copyright": "アニメ情報は公開情報と権利者の情報に基づいています。本サイトはアニメ本編の動画をホストしていません。",
+    "attribution": "一部のアニメ情報はAniListが提供しています。"
+  },
+  "lang": {
+    "th": "TH",
+    "en": "EN",
+    "ja": "JP",
+    "other": "その他",
+    "fallback": "タイ語の文章はまだありません。別の言語を表示しています。",
+    "audio": "音声",
+    "subs": "字幕",
+    "dubTh": "タイ語吹替",
+    "subTh": "タイ語字幕"
   },
   "home": {
     "title": "今日のアニメ",
@@ -38,6 +63,235 @@
       "availabilityChanges": "最近の配信状況の変更",
       "hotThreads": "人気のスレッド"
     },
-    "empty": "準備中です"
+    "empty": "この項目にはまだ情報がありません",
+    "threadComments": "コメント {count} 件"
+  },
+  "status": {
+    "upcoming": "放送予定",
+    "airing": "放送中",
+    "finished": "完結",
+    "hiatus": "休止中",
+    "scheduled": "放送待ち",
+    "aired": "放送済み",
+    "delayed": "延期"
+  },
+  "availability": {
+    "title": "タイでの配信状況",
+    "added": "追加",
+    "changed": "変更",
+    "removed": "配信終了",
+    "none": "現在、タイで確認できる配信先はありません",
+    "verifiedAt": "最終確認 {date}",
+    "history": "配信の履歴",
+    "historyEmpty": "履歴はまだありません",
+    "visit": "配信サイトへ",
+    "stale": "30日以上確認されていません"
+  },
+  "anime": {
+    "episodes": "話数",
+    "format": "形式",
+    "score": "平均点",
+    "genres": "ジャンル",
+    "startDate": "放送開始",
+    "synopsis": "あらすじ",
+    "noSynopsis": "あらすじはまだありません。確認中です。",
+    "trailers": "PV",
+    "noTrailers": "確認済みの公式チャンネルのPVはまだありません",
+    "episodeList": "全エピソード",
+    "noEpisodes": "放送スケジュールはまだありません",
+    "watchOrder": "視聴順",
+    "votes": "{count} 票",
+    "vote": "投票する",
+    "unvote": "投票を取り消す",
+    "follow": "フォロー",
+    "unfollow": "フォローを解除",
+    "followers": "フォロワー {count} 人",
+    "shop": "公式グッズ",
+    "shopDisclosure": "提携リンクです。これらのリンクから購入すると、紹介料が発生する場合があります。",
+    "season": "シーズン"
+  },
+  "episode": {
+    "title": "第{number}話",
+    "airsAt": "放送",
+    "noTime": "放送時刻はまだありません",
+    "scheduleHistory": "放送時刻の変更履歴",
+    "scheduleHistoryEmpty": "放送時刻は変更されていません",
+    "backToAnime": "作品ページへ戻る",
+    "moved": "{from} から {to} に変更"
+  },
+  "comments": {
+    "title": "コメント",
+    "filter": "表示する言語",
+    "all": "すべての言語",
+    "empty": "この言語のコメントはまだありません",
+    "placeholder": "コメントを書く（2000文字まで）",
+    "langTag": "コメントの言語",
+    "langAuto": "自動判定",
+    "post": "投稿する",
+    "reply": "返信",
+    "report": "通報",
+    "reported": "通報しました。ありがとうございます。",
+    "reportReason": "理由",
+    "signInToComment": "コメントするにはログインしてください",
+    "locked": "このスレッドは閉じられています",
+    "posted": "コメントを投稿しました",
+    "errors": {
+      "sign_in_required": "先にログインしてください",
+      "invalid_body": "コメントは1〜2000文字で入力してください",
+      "rate_limited": "投稿が多すぎます。しばらくしてからお試しください",
+      "thread_locked": "このスレッドは閉じられています",
+      "thread_not_found": "スレッドが見つかりません",
+      "parent_not_found": "返信先のコメントが見つかりません",
+      "invalid_reason": "理由は3文字以上で入力してください",
+      "generic": "エラーが発生しました。もう一度お試しください"
+    }
+  },
+  "schedule": {
+    "title": "放送表",
+    "subtitle": "今後7日間を、選んだタイムゾーンで表示します",
+    "timezone": "タイムゾーン",
+    "apply": "表示",
+    "empty": "この期間のエピソードはまだありません"
+  },
+  "season": {
+    "winter": "冬",
+    "spring": "春",
+    "summer": "夏",
+    "fall": "秋",
+    "title": "{year}年{season}アニメ",
+    "sortNote": "投票数、次いで平均点順",
+    "empty": "この時期の作品はまだありません",
+    "invalid": "不明なシーズンです"
+  },
+  "search": {
+    "title": "アニメを検索",
+    "query": "タイトル",
+    "genre": "ジャンル",
+    "allGenres": "すべてのジャンル",
+    "platform": "配信先",
+    "allPlatforms": "すべての配信先",
+    "thaiDub": "タイ語吹替あり",
+    "thaiSub": "タイ語字幕あり",
+    "submit": "検索",
+    "empty": "条件に合う作品がありません"
+  },
+  "where": {
+    "title": "{platform} で視聴",
+    "subtitle": "タイで配信権を持つ作品です。確認日を表示しています。",
+    "empty": "まだ作品がありません",
+    "invalid": "不明な配信先です"
+  },
+  "watchOrder": {
+    "title": "{title} の視聴順",
+    "subtitle": "おすすめの順番です。ネタバレを含む項目は初期状態で隠しています。",
+    "empty": "この作品の視聴順はまだありません",
+    "spoilerShow": "ネタバレ項目を表示",
+    "spoilerNote": "ネタバレ"
+  },
+  "guides": {
+    "title": "ガイド",
+    "readMore": "続きを読む",
+    "updated": "{date} 更新",
+    "notTranslated": "このガイドはまだ日本語版がありません。英語を表示しています。"
+  },
+  "notifications": {
+    "title": "通知",
+    "empty": "通知はまだありません",
+    "markAll": "すべて既読にする",
+    "unread": "未読",
+    "signIn": "通知を見るにはログインしてください"
+  },
+  "profile": {
+    "title": "{username} のプロフィール",
+    "joined": "{date} 参加",
+    "comments": "最近のコメント",
+    "follows": "フォロー中",
+    "empty": "まだありません",
+    "notFound": "ユーザーが見つかりません"
+  },
+  "login": {
+    "title": "ログイン",
+    "description": "メールアドレスを入力すると、ログイン用のリンクを送ります。パスワードは不要です。",
+    "email": "メールアドレス",
+    "send": "ログインリンクを送る",
+    "sent": "リンクを送信しました。メールをご確認ください。",
+    "errors": {
+      "invalid_email": "メールアドレスの形式が正しくありません",
+      "not_configured": "ログイン機能がまだ設定されていません",
+      "send_failed": "リンクを送信できませんでした。もう一度お試しください"
+    }
+  },
+  "report": {
+    "title": "削除申請",
+    "description": "このサイトのコンテンツの権利を持っている場合や、権利侵害だと思う場合にご利用ください。チームが確認し、メールで返信します。",
+    "name": "お名前",
+    "email": "連絡先メール",
+    "url": "このサイト上のコンテンツのURL",
+    "reason": "詳細",
+    "submit": "申請する",
+    "success": "受け付けました。確認でき次第対応します。",
+    "error": "すべての項目を正しく入力してください"
+  },
+  "legal": {
+    "draft": "この文書は正式公開の前に法務確認が必要な草案です。"
+  },
+  "admin": {
+    "title": "管理",
+    "forbidden": "このページは管理者のみ利用できます",
+    "drafts": "AI下書きの確認キュー",
+    "draftsEmpty": "確認待ちの下書きはありません",
+    "approve": "承認して公開",
+    "reject": "却下",
+    "titleField": "タイ語タイトル",
+    "synopsisField": "タイ語あらすじ",
+    "reports": "通報されたコメント",
+    "reportsEmpty": "通報はありません",
+    "hide": "非表示",
+    "remove": "削除",
+    "restore": "復元",
+    "takedowns": "削除申請",
+    "takedownsEmpty": "申請はありません",
+    "markActioned": "対応済み",
+    "markRejected": "申請を却下",
+    "channels": "PVの埋め込みを許可する公式チャンネル",
+    "channelId": "YouTubeチャンネルID",
+    "channelName": "チャンネル名",
+    "evidenceUrl": "公式であることの根拠",
+    "addChannel": "チャンネルを追加",
+    "trailers": "PVを追加",
+    "youtubeId": "YouTube動画ID",
+    "animeSlug": "作品のslug",
+    "addTrailer": "PVを追加",
+    "availabilityTitle": "配信状況",
+    "platformId": "配信先ID",
+    "region": "地域",
+    "audioLangs": "音声（例: ja,en,th）",
+    "subLangs": "字幕（例: th,en）",
+    "sourceUrl": "権利を確認できるリンク",
+    "addAvailability": "配信状況を保存",
+    "endAvailability": "配信を終了",
+    "announcements": "公式のお知らせ",
+    "headline": "見出し",
+    "summary": "概要",
+    "sourceName": "出典名",
+    "publishedAt": "公開日時",
+    "addAnnouncement": "お知らせを追加",
+    "watchOrderTitle": "視聴順",
+    "franchiseSlug": "フランチャイズのslug",
+    "relatedSlug": "関連作品のslug",
+    "position": "順番",
+    "relation": "関係（例: 本編）",
+    "spoiler": "ネタバレを含む",
+    "note": "メモ",
+    "addWatchOrder": "項目を追加",
+    "platforms": "配信先",
+    "platformName": "配信先名",
+    "officialUrl": "公式サイト",
+    "addPlatform": "配信先を追加",
+    "done": "保存しました",
+    "failed": "保存できませんでした。入力内容を確認してください"
+  },
+  "errors": {
+    "generic": "エラーが発生しました。もう一度お試しください"
   }
 }

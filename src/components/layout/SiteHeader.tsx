@@ -1,10 +1,12 @@
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 import { Link } from "@/i18n/navigation";
+import { AccountLinks } from "./AccountLinks";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { navItems } from "./nav";
 import { ThemeToggle } from "./ThemeToggle";
 
-export async function SiteHeader() {
+export async function SiteHeader({ locale }: { locale: string }) {
   const t = await getTranslations("nav");
 
   return (
@@ -18,24 +20,12 @@ export async function SiteHeader() {
           <ul className="flex items-center gap-1">
             {navItems.map((item) => (
               <li key={item.key}>
-                {item.ready ? (
-                  <Link
-                    href={item.href}
-                    className="rounded-md px-3 py-2 text-sm text-muted transition-colors hover:bg-raised hover:text-ink"
-                  >
-                    {t(item.key)}
-                  </Link>
-                ) : (
-                  <span
-                    aria-disabled="true"
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-muted/60"
-                  >
-                    {t(item.key)}
-                    <span className="rounded bg-raised px-1.5 text-[10px] text-muted">
-                      {t("soon")}
-                    </span>
-                  </span>
-                )}
+                <Link
+                  href={item.href}
+                  className="rounded-md px-3 py-2 text-sm text-muted transition-colors hover:bg-raised hover:text-ink"
+                >
+                  {t(item.key)}
+                </Link>
               </li>
             ))}
           </ul>
@@ -44,6 +34,9 @@ export async function SiteHeader() {
         <div className="ml-auto flex items-center gap-2">
           <LocaleSwitcher />
           <ThemeToggle />
+          <Suspense fallback={null}>
+            <AccountLinks locale={locale} />
+          </Suspense>
         </div>
       </div>
     </header>

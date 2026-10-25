@@ -15,21 +15,12 @@ export async function BottomNav() {
       <ul className="grid grid-cols-4">
         {navItems.map((item) => (
           <li key={item.key}>
-            {item.ready ? (
-              <Link
-                href={item.href}
-                className="flex min-h-14 items-center justify-center px-2 text-center text-xs text-ink"
-              >
-                {t(item.key)}
-              </Link>
-            ) : (
-              <span
-                aria-disabled="true"
-                className="flex min-h-14 items-center justify-center px-2 text-center text-xs text-muted/60"
-              >
-                {t(item.key)}
-              </span>
-            )}
+            <Link
+              href={item.href}
+              className="flex min-h-14 items-center justify-center px-2 text-center text-xs text-ink"
+            >
+              {t(item.key)}
+            </Link>
           </li>
         ))}
       </ul>

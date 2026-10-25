@@ -9,9 +9,10 @@ const tableNames = (Object.values(schema) as unknown[])
   .sort();
 
 describe("database schema", () => {
-  it("defines every table listed in DESIGN.md section 9", () => {
+  it("defines every table from DESIGN.md section 9 and the feature tables", () => {
     expect(tableNames).toEqual(
       [
+        // DESIGN.md section 9
         "ai_draft",
         "anime",
         "anime_i18n",
@@ -26,6 +27,14 @@ describe("database schema", () => {
         "thread",
         "trailer",
         "users",
+        // Added for phases P1 to P7
+        "announcement",
+        "anime_follow",
+        "anime_vote",
+        "notification",
+        "official_channel",
+        "takedown_request",
+        "watch_order_entry",
       ].sort(),
     );
   });

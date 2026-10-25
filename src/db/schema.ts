@@ -4,6 +4,7 @@ import {
   bigserial,
   boolean,
   check,
+  date,
   index,
   integer,
   jsonb,
@@ -66,16 +67,37 @@ export const users = pgTable("users", {
   createdAt: createdAt(),
 });
 
-export const anime = pgTable("anime", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  slug: text("slug").notNull().unique(),
-  titleRomaji: text("title_romaji").notNull(),
-  malId: integer("mal_id").unique(),
-  anilistId: integer("anilist_id").unique(),
-  status: animeStatusEnum("status").notNull().default("upcoming"),
-  coverUrl: text("cover_url"),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const notificationKindEnum = pgEnum("notification_kind", [
+  "episode_schedule",
+  "availability",
+]);
+export const takedownStatusEnum = pgEnum("takedown_status", [
+  "open",
+  "actioned",
+  "rejected",
+]);
+
+export const anime = pgTable(
+  "anime",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    slug: text("slug").notNull().unique(),
+    titleRomaji: text("title_romaji").notNull(),
+    malId: integer("mal_id").unique(),
+    anilistId: integer("anilist_id").unique(),
+    status: animeStatusEnum("status").notNull().default("upcoming"),
+    format: text("format"),
+    episodeCount: integer("episode_count"),
+    genres: text("genres").array().notNull().default(sql`'{}'`),
+    averageScore: integer("average_score"),
+    startDate: date("start_date"),
+    coverUrl: text("cover_url"),
+    bannerUrl: text("banner_url"),
+    anilistSyncedAt: timestamp("anilist_synced_at", { withTimezone: true }),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("anime_status_idx").on(t.status)],
+);
 
 export const animeI18n = pgTable(
   "anime_i18n",
@@ -281,3 +303,110 @@ export const aiDraft = pgTable(
   },
   (t) => [index("ai_draft_status_idx").on(t.status)],
 );
+
+// Channels whose trailers may be embedded. Only admins add rows here (DESIGN.md section 1).
+export const officialChannel = pgTable("official_channel", {
+  channelId: text("channel_id").primaryKey(),
+  name: text("name").notNull(),
+  evidenceUrl: text("evidence_url").notNull(),
+  verifiedBy: uuid("verified_by").references(() => users.id),
+  verifiedAt: timestamp("verified_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Official news from studios, distributors and platforms. Always linked to the source.
+export const announcement = pgTable(
+  "announcement",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    animeId: uuid("anime_id").references(() => anime.id, { onDelete: "set null" }),
+    title: text("title").notNull(),
+    summary: text("summary"),
+    sourceName: text("source_name").notNull(),
+    sourceUrl: text("source_url").notNull(),
+    publishedAt: timestamp("published_at", { withTimezone: true }).notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("announcement_published_idx").on(t.publishedAt)],
+);
+
+// Watch order for a franchise, listed on the title's watch-order page.
+export const watchOrderEntry = pgTable(
+  "watch_order_entry",
+  {
+    id: serial("id").primaryKey(),
+    animeId: uuid("anime_id")
+      .notNull()
+      .references(() => anime.id, { onDelete: "cascade" }),
+    position: integer("position").notNull(),
+    relatedAnimeId: uuid("related_anime_id")
+      .notNull()
+      .references(() => anime.id, { onDelete: "cascade" }),
+    relation: text("relation").notNull(),
+    isSpoiler: boolean("is_spoiler").notNull().default(false),
+    note: text("note"),
+  },
+  (t) => [uniqueIndex("watch_order_position_uq").on(t.animeId, t.position)],
+);
+
+export const animeVote = pgTable(
+  "anime_vote",
+  {
+    animeId: uuid("anime_id")
+      .notNull()
+      .references(() => anime.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.animeId, t.userId] }),
+    index("anime_vote_anime_idx").on(t.animeId),
+  ],
+);
+
+export const animeFollow = pgTable(
+  "anime_follow",
+  {
+    animeId: uuid("anime_id")
+      .notNull()
+      .references(() => anime.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.animeId, t.userId] }),
+    index("anime_follow_user_idx").on(t.userId),
+  ],
+);
+
+export const notification = pgTable(
+  "notification",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: notificationKindEnum("kind").notNull(),
+    animeId: uuid("anime_id").references(() => anime.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    href: text("href").notNull(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("notification_user_idx").on(t.userId, t.readAt)],
+);
+
+// Notice-and-takedown requests (DESIGN.md section 13).
+export const takedownRequest = pgTable("takedown_request", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  requesterName: text("requester_name").notNull(),
+  requesterEmail: text("requester_email").notNull(),
+  url: text("url").notNull(),
+  reason: text("reason").notNull(),
+  status: takedownStatusEnum("status").notNull().default("open"),
+  createdAt: createdAt(),
+});

@@ -1,16 +1,40 @@
 # AnimeHub
 
 เว็บรวมข้อมูลอนิเมะ ตารางฉาย และชุมชนหลายภาษา (TH / EN / JP)
-รายละเอียดการออกแบบทั้งหมดอยู่ที่ [DESIGN.md](DESIGN.md)
+รายละเอียดการออกแบบอยู่ที่ [DESIGN.md](DESIGN.md)
 
-> เว็บนี้ไม่โฮสต์หรือฉายวิดีโอตอนอนิเมะ ลิงก์วิดีโอที่แสดงได้มีเฉพาะ trailer จากช่องทางการที่ตรวจแล้ว
+> เว็บนี้ไม่โฮสต์หรือฉายวิดีโอตอนอนิเมะ ลิงก์วิดีโอที่แสดงได้มีเฉพาะ trailer จากช่องทางการที่ตรวจแล้ว และลิงก์ไปยังแพลตฟอร์มที่มีสิทธิ์จริง
 
-## เริ่มต้นใช้งาน
+## เริ่มต้นใช้งาน (ทดลองในเครื่อง)
+
+ต้องมี Node 24 ขึ้นไป
 
 ```bash
 npm install
 cp .env.example .env.local
+```
+
+ตั้งค่าในไฟล์ `.env.local` ให้ใช้ฐานข้อมูลทดลองในเครื่อง:
+
+```
+DATABASE_URL=postgresql://postgres@127.0.0.1:5433/postgres
+DATABASE_POOL_MAX=1
+```
+
+จากนั้นเปิดสองหน้าต่าง
+
+```bash
+npm run db:dev
+```
+
+```bash
 npm run dev
+```
+
+ดึงตารางฉายจาก AniList ครั้งแรก (ต้องตั้ง `CRON_SECRET` ใน `.env.local` ก่อน):
+
+```bash
+curl -H "Authorization: Bearer <CRON_SECRET>" http://localhost:3000/api/cron/sync
 ```
 
 เปิด http://localhost:3000 แล้วระบบจะพาไปหน้าภาษาไทยที่ `/th`
@@ -20,7 +44,8 @@ npm run dev
 | คำสั่ง | ทำอะไร |
 |---|---|
 | `npm run dev` | เปิดเซิร์ฟเวอร์พัฒนา |
-| `npm run build` | build สำหรับ production |
+| `npm run db:dev` | เปิดฐานข้อมูลทดลอง (PGlite) ที่พอร์ต 5433 |
+| `npm run build` | build สำหรับ production (ไม่ต้องมีฐานข้อมูลตอน build) |
 | `npm run lint` | ตรวจ ESLint |
 | `npm run typecheck` | ตรวจ TypeScript |
 | `npm test` | รันเทสด้วย Vitest |
@@ -30,14 +55,43 @@ npm run dev
 
 ```
 messages/            ข้อความ UI ทั้ง 3 ภาษา (th คือต้นฉบับ)
-src/i18n/            routing, request config, navigation helpers
-src/proxy.ts         proxy ของ next-intl (กำหนดภาษาจาก URL)
-src/app/[locale]/    หน้าและ layout ทั้งหมด ต่อภาษา
-src/components/      layout และ UI ที่ใช้ร่วมกัน
-src/db/schema.ts     schema ของ PostgreSQL (Drizzle)
+src/app/[locale]/    หน้าทั้งหมด แยกตามภาษา
+src/app/api/cron/    งานตั้งเวลา: sync ตารางฉาย และร่าง AI
+src/actions/         server actions (ความเห็น โหวต ติดตาม หลังบ้าน)
+src/anilist/         client, mapper และ sync จาก AniList
+src/ai/              ร่างข้อมูลด้วย AI, validator และคิวตรวจ
+src/data/            การอ่านข้อมูล (มี cache และ tag)
+src/db/              schema, client ของ Postgres และ PGlite สำหรับเทส
+src/content/         คู่มือ หน้าทั่วไป และ affiliate
 drizzle/             migration ที่ generate แล้ว
+scripts/dev-db.ts    ฐานข้อมูลทดลองในเครื่อง
 ```
 
-## ฐานข้อมูล
+## สถานะการพัฒนา
 
-ใช้ PostgreSQL (แนะนำ Supabase) ตั้งค่า `DATABASE_URL` ใน `.env.local` แล้วรัน `npm run db:generate` เมื่อแก้ schema
+โค้ดครอบคลุมเฟส P0 ถึง P7 ใน DESIGN.md แต่บางส่วนต้องรอบัญชีภายนอกก่อนใช้งานจริง
+
+| เรื่อง | สถานะ |
+|---|---|
+| แคตตาล็อก หน้าเรื่อง หน้าตอน ค้นหา ฤดูกาล | ใช้งานได้ (ข้อมูลจาก AniList) |
+| ตารางฉาย หน้าแรกแบบฟีด เวลาไทย | ใช้งานได้ |
+| ดูได้ที่ไหน ประวัติสิทธิ์ ตัวอย่างจากช่องทางการ | ใช้งานได้ ต้องให้แอดมินกรอกข้อมูลที่ตรวจแล้ว |
+| กระทู้หลายภาษา ความเห็น รายงาน | ใช้งานได้เมื่อตั้งค่า Supabase Auth |
+| ร่าง AI และคิวตรวจ | ใช้งานได้เมื่อมี `ANTHROPIC_API_KEY` ผู้ตรวจต้องอนุมัติทุกครั้ง |
+| โปรไฟล์ ติดตาม โหวต แจ้งเตือน คู่มือ | ใช้งานได้ |
+| SEO: sitemap, robots, JSON-LD, hreflang, noindex | ใช้งานได้ |
+| Affiliate และโฆษณา | โครงสร้างพร้อม แต่ปิดอยู่ (รายการว่าง และ `NEXT_PUBLIC_ADS_ENABLED=false`) |
+| สมาชิกแบบไม่มีโฆษณา | ยังไม่ทำ ต้องมีผู้ให้บริการชำระเงิน |
+| การยินยอมคุกกี้ | ยังไม่ทำ ต้องทำก่อนเปิดโฆษณา |
+
+## ข้อควรทราบเรื่องข้อมูล
+
+- **AniList**: เงื่อนไขการใช้งานฟรีเมื่อรายได้ไม่เกิน 150 ดอลลาร์ต่อเดือน เกินนั้นต้องขอสัญญาอนุญาต และห้ามเก็บหรือรวบรวมข้อมูลจำนวนมาก ระบบจึงดึงเฉพาะช่วงตารางฉายรอบวันนี้ (ย้อนหลัง 1 วัน ล่วงหน้า 14 วัน) และไม่เก็บเรื่องย่อของ AniList
+- **โปสเตอร์**: โหลดจาก CDN ของ AniList ตาม URL ที่ API ส่งมา ต้องตรวจเงื่อนไขการใช้รูปก่อนใช้เชิงพาณิชย์
+- **ร่างกฎหมาย**: หน้า ข้อตกลงการใช้งาน และนโยบายความเป็นส่วนตัวยังเป็นร่าง ต้องให้ที่ปรึกษากฎหมายไทยตรวจก่อนเผยแพร่
+
+## การนำขึ้นใช้งาน
+
+- ฐานข้อมูล: ตั้ง `DATABASE_URL` เป็น Supabase แล้วรัน migration จากโฟลเดอร์ `drizzle/`
+- งานตั้งเวลา: [vercel.json](vercel.json) ตั้งให้ซิงก์ตารางฉายทุกชั่วโมง และร่าง AI ทุกชั่วโมงครึ่ง ต้องตั้ง `CRON_SECRET` ให้ตรงกับที่ Vercel ส่งมา
+- ตัวแปรทั้งหมดอยู่ใน [.env.example](.env.example)
