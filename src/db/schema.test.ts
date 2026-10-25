@@ -13,7 +13,6 @@ describe("database schema", () => {
     expect(tableNames).toEqual(
       [
         // DESIGN.md section 9
-        "ai_draft",
         "anime",
         "anime_i18n",
         "availability_log",
@@ -23,7 +22,9 @@ describe("database schema", () => {
         "episode_schedule_log",
         "platform",
         "platform_availability",
+        "proposal",
         "season_entry",
+        "series",
         "thread",
         "trailer",
         "users",

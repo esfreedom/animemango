@@ -29,6 +29,7 @@ query AiringWindow($from: Int!, $to: Int!, $page: Int!) {
         coverImage { extraLarge }
         bannerImage
         isAdult
+        nextAiringEpisode { episode }
       }
     }
   }
@@ -59,6 +60,7 @@ const mediaSchema = z.object({
   coverImage: z.object({ extraLarge: z.string().nullable() }).nullable(),
   bannerImage: z.string().nullable(),
   isAdult: z.boolean(),
+  nextAiringEpisode: z.object({ episode: z.number() }).nullable().optional(),
 });
 
 const pageSchema = z.object({
@@ -122,4 +124,89 @@ async function postWithRetry(payload: unknown, fetchImpl: FetchLike): Promise<un
     }
     return response.json();
   }
+}
+
+// One title with its relation edges. Used to group seasons, movies and specials into a series.
+const MEDIA_WITH_RELATIONS_QUERY = `
+query MediaWithRelations($id: Int!) {
+  Media(id: $id, type: ANIME) {
+    id
+    type
+    idMal
+    format
+    status
+    episodes
+    genres
+    averageScore
+    season
+    seasonYear
+    startDate { year month day }
+    title { romaji english native }
+    coverImage { extraLarge }
+    bannerImage
+    isAdult
+    nextAiringEpisode { episode }
+    relations {
+      edges {
+        relationType(version: 2)
+        node {
+          id
+          type
+          format
+          startDate { year month day }
+          title { romaji english native }
+        }
+      }
+    }
+  }
+}`;
+
+const dateSchema = z.object({
+  year: z.number().nullable(),
+  month: z.number().nullable(),
+  day: z.number().nullable(),
+});
+
+const titleSchema = z.object({
+  romaji: z.string().nullable(),
+  english: z.string().nullable(),
+  native: z.string().nullable(),
+});
+
+const mediaWithRelationsSchema = mediaSchema.extend({
+  type: z.string().nullable(),
+  relations: z.object({
+    edges: z.array(
+      z.object({
+        relationType: z.string(),
+        node: z.object({
+          id: z.number(),
+          type: z.string().nullable(),
+          format: z.string().nullable(),
+          startDate: dateSchema.nullable(),
+          title: titleSchema,
+        }),
+      }),
+    ),
+  }),
+});
+
+export type MediaWithRelations = z.infer<typeof mediaWithRelationsSchema>;
+
+export function isoDate(value: { year: number | null; month: number | null; day: number | null } | null): string | null {
+  const { year, month, day } = value ?? {};
+  if (!year) return null;
+  if (!month) return `${year}-01-01`;
+  if (!day) return `${year}-${String(month).padStart(2, "0")}-01`;
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+// Returns null when AniList does not know the id. Adult titles are returned, and the mapper skips them.
+export async function fetchMediaWithRelations(
+  id: number,
+  fetchImpl: FetchLike = fetch,
+): Promise<MediaWithRelations | null> {
+  const body = await postWithRetry({ query: MEDIA_WITH_RELATIONS_QUERY, variables: { id } }, fetchImpl);
+  const parsed = z.object({ data: z.object({ Media: mediaWithRelationsSchema.nullable() }) }).parse(body);
+  return parsed.data.Media;
 }

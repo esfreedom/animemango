@@ -57,7 +57,7 @@
     "title": "Anime today",
     "subtitle": "Airing schedules, official announcements, and changes to where you can watch in Thailand, shown in Thai time.",
     "sections": {
-      "airingToday": "Airing today",
+      "airingToday": "Latest updates",
       "upcoming": "Airing soon",
       "announcements": "Official announcements",
       "availabilityChanges": "Recent availability changes",
@@ -211,14 +211,12 @@
   },
   "login": {
     "title": "Sign in",
-    "description": "Enter your email and we will send a sign-in link. No password needed.",
-    "email": "Email",
-    "send": "Send sign-in link",
-    "sent": "Link sent. Check your email.",
+    "description": "Sign in with your Google account. No password or email to type.",
+    "google": "Continue with Google",
+    "newAccount": "No account yet? We create one automatically the first time you sign in.",
     "errors": {
-      "invalid_email": "That email address does not look right",
       "not_configured": "Sign-in is not configured yet",
-      "send_failed": "Could not send the link. Please try again"
+      "oauth_failed": "Google sign-in did not work. Please try again"
     }
   },
   "report": {
@@ -293,5 +291,24 @@
   },
   "errors": {
     "generic": "Something went wrong. Please try again"
+  },
+  "series": {
+    "title": "{title} series",
+    "seasons": "All seasons and entries",
+    "empty": "No entries in this series yet",
+    "kind": {
+      "tv": "TV",
+      "movie": "Movie",
+      "ova": "OVA",
+      "special": "Special"
+    }
+  },
+  "prefs": {
+    "title": "Preferred language",
+    "audio": "Audio",
+    "sub": "Subtitles",
+    "none": "No preference",
+    "noSub": "No subtitles",
+    "remembered": "We remember this for next time"
   }
 }

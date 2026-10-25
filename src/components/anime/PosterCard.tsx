@@ -8,11 +8,13 @@ type PosterCardProps = {
   coverUrl: string | null;
   meta?: ReactNode;
   tags?: ReactNode;
-  // Posters are 2:3 and the sizes match the grids on the home and schedule pages.
+  // Shown in the top-right corner of the poster (EP n or END, approved plan section 3).
+  corner?: ReactNode;
+  // Posters are 2:3. The sizes match the grids on the home, schedule and series pages.
   priority?: boolean;
 };
 
-export function PosterCard({ href, title, coverUrl, meta, tags, priority = false }: PosterCardProps) {
+export function PosterCard({ href, title, coverUrl, meta, tags, corner, priority = false }: PosterCardProps) {
   return (
     <Link href={href} className="group block space-y-2">
       <div className="relative aspect-[2/3] overflow-hidden rounded-lg border border-line bg-raised transition-transform group-hover:-translate-y-0.5">
@@ -30,6 +32,7 @@ export function PosterCard({ href, title, coverUrl, meta, tags, priority = false
             {title}
           </span>
         )}
+        {corner && <span className="absolute right-1.5 top-1.5 z-10">{corner}</span>}
       </div>
       <div className="space-y-1">
         <p className="line-clamp-2 text-sm font-medium leading-snug text-ink">{title}</p>

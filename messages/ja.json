@@ -57,7 +57,7 @@
     "title": "今日のアニメ",
     "subtitle": "放送スケジュール、公式のお知らせ、タイでの配信状況の変更を、タイ時間で表示します。",
     "sections": {
-      "airingToday": "今日放送のエピソード",
+      "airingToday": "最新の更新",
       "upcoming": "まもなく放送",
       "announcements": "公式のお知らせ",
       "availabilityChanges": "最近の配信状況の変更",
@@ -211,14 +211,12 @@
   },
   "login": {
     "title": "ログイン",
-    "description": "メールアドレスを入力すると、ログイン用のリンクを送ります。パスワードは不要です。",
-    "email": "メールアドレス",
-    "send": "ログインリンクを送る",
-    "sent": "リンクを送信しました。メールをご確認ください。",
+    "description": "Googleアカウントでログインします。パスワードやメールアドレスの入力は不要です。",
+    "google": "Googleで続行",
+    "newAccount": "アカウントがなくても大丈夫です。初回ログイン時に自動で作成されます。",
     "errors": {
-      "invalid_email": "メールアドレスの形式が正しくありません",
       "not_configured": "ログイン機能がまだ設定されていません",
-      "send_failed": "リンクを送信できませんでした。もう一度お試しください"
+      "oauth_failed": "Googleでのログインに失敗しました。もう一度お試しください"
     }
   },
   "report": {
@@ -293,5 +291,24 @@
   },
   "errors": {
     "generic": "エラーが発生しました。もう一度お試しください"
+  },
+  "series": {
+    "title": "{title} シリーズ",
+    "seasons": "すべてのシーズンと作品",
+    "empty": "このシリーズの作品はまだありません",
+    "kind": {
+      "tv": "TV",
+      "movie": "映画",
+      "ova": "OVA",
+      "special": "スペシャル"
+    }
+  },
+  "prefs": {
+    "title": "お好みの言語",
+    "audio": "音声",
+    "sub": "字幕",
+    "none": "指定なし",
+    "noSub": "字幕なし",
+    "remembered": "次回も記憶されます"
   }
 }

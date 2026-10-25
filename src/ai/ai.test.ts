@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { asAppDb, createPgliteDb, type PgliteDb } from "@/db/test-db";
-import { aiDraft, anime, animeI18n } from "@/db/schema";
+import { anime, animeI18n, proposal } from "@/db/schema";
 import { parseJsonObject } from "./anthropic";
 import { runDraftPipeline, type DraftModel } from "./pipeline";
 import { validateDraftFields, validateSources } from "./validator";
@@ -81,8 +81,8 @@ describe("runDraftPipeline", () => {
 
     expect(result).toEqual({ created: 1, rejected: 1, failed: 0 });
 
-    const drafts = await db.select().from(aiDraft);
-    expect(drafts.map((row) => row.status).sort()).toEqual(["draft", "rejected"]);
+    const drafts = await db.select().from(proposal);
+    expect(drafts.map((row) => row.status).sort()).toEqual(["pending", "rejected"]);
     expect(drafts.every((row) => row.promptVersion && row.aiModel === "test-model")).toBe(true);
   });
 

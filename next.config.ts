@@ -9,7 +9,11 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   images: {
     // Posters and banners come from the AniList CDN, as returned by the API.
-    remotePatterns: [{ protocol: "https", hostname: "s4.anilist.co" }],
+    remotePatterns: [
+      { protocol: "https", hostname: "s4.anilist.co" },
+      // Google profile pictures, returned by Supabase on sign-in.
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+    ],
   },
   turbopack: {
     resolveAlias: {

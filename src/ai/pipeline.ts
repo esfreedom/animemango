@@ -1,6 +1,6 @@
 import { desc, sql } from "drizzle-orm";
 import type { Db } from "@/db/client";
-import { aiDraft, anime } from "@/db/schema";
+import { anime, proposal } from "@/db/schema";
 import { validateDraftFields, validateSources, type DraftSource } from "./validator";
 
 export const PROMPT_VERSION = "2026-10-v1";
@@ -38,7 +38,7 @@ export async function runDraftPipeline({ db, model, modelName, limit = 5 }: Pipe
       sql`not exists (
         select 1 from anime_i18n ai where ai.anime_id = ${anime.id} and ai.locale = 'th'
       ) and not exists (
-        select 1 from ai_draft d where d.anime_id = ${anime.id}
+        select 1 from proposal p where p.anime_id = ${anime.id} and p.kind = 'metadata'
       )`,
     )
     .orderBy(desc(anime.averageScore))
@@ -73,13 +73,14 @@ export async function runDraftPipeline({ db, model, modelName, limit = 5 }: Pipe
     const sourceErrors = validateSources(sources, new Set([sourceUrl]));
     const errors = validation.ok ? sourceErrors : [...validation.errors, ...sourceErrors];
 
-    await db.insert(aiDraft).values({
+    await db.insert(proposal).values({
+      kind: "metadata",
       animeId: row.id,
-      fields: validation.ok ? validation.fields : { errors },
+      payload: validation.ok ? validation.fields : { errors },
       sources,
       aiModel: modelName,
       promptVersion: PROMPT_VERSION,
-      status: errors.length === 0 ? "draft" : "rejected",
+      status: errors.length === 0 ? "pending" : "rejected",
     });
 
     if (errors.length === 0) result.created++;

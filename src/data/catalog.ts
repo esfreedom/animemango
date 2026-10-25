@@ -16,6 +16,7 @@ import {
   trailer,
   watchOrderEntry,
   comment,
+  series,
 } from "@/db/schema";
 import type { Season } from "@/lib/slug";
 
@@ -32,7 +33,10 @@ export async function getAnimeBySlug(slug: string) {
   const [row] = await db.select().from(anime).where(eq(anime.slug, slug)).limit(1);
   if (!row) return null;
 
-  const [titles, seasons, episodes, trailers, threads] = await Promise.all([
+  const [parentRows, titles, seasons, episodes, trailers, threads] = await Promise.all([
+    row.seriesId
+      ? db.select({ slug: series.slug, titleRomaji: series.titleRomaji }).from(series).where(eq(series.id, row.seriesId)).limit(1)
+      : Promise.resolve([]),
     db.select().from(animeI18n).where(eq(animeI18n.animeId, row.id)),
     db.select().from(seasonEntry).where(eq(seasonEntry.animeId, row.id)),
     db
@@ -46,6 +50,7 @@ export async function getAnimeBySlug(slug: string) {
 
   return {
     anime: row,
+    series: parentRows[0] ?? null,
     titles,
     seasons,
     episodes,

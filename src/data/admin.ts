@@ -1,32 +1,35 @@
 import { desc, eq, isNull } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import {
-  aiDraft,
+  proposal,
   anime,
   officialChannel,
   platform,
   platformAvailability,
+  series,
   takedownRequest,
 } from "@/db/schema";
 
 // Admin queries are read on each request, never cached, so the queues are always current.
 
-export async function getPendingDrafts(limit = 20) {
+export async function getPendingProposals(limit = 50) {
   return getDb()
     .select({
-      id: aiDraft.id,
-      fields: aiDraft.fields,
-      sources: aiDraft.sources,
-      aiModel: aiDraft.aiModel,
-      promptVersion: aiDraft.promptVersion,
-      createdAt: aiDraft.createdAt,
+      id: proposal.id,
+      kind: proposal.kind,
+      payload: proposal.payload,
+      sources: proposal.sources,
+      aiModel: proposal.aiModel,
+      promptVersion: proposal.promptVersion,
+      createdAt: proposal.createdAt,
       animeTitle: anime.titleRomaji,
-      animeSlug: anime.slug,
+      seriesTitle: series.titleRomaji,
     })
-    .from(aiDraft)
-    .innerJoin(anime, eq(aiDraft.animeId, anime.id))
-    .where(eq(aiDraft.status, "draft"))
-    .orderBy(desc(aiDraft.createdAt))
+    .from(proposal)
+    .leftJoin(anime, eq(proposal.animeId, anime.id))
+    .leftJoin(series, eq(proposal.seriesId, series.id))
+    .where(eq(proposal.status, "pending"))
+    .orderBy(desc(proposal.createdAt))
     .limit(limit);
 }
 

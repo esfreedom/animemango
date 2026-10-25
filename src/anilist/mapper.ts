@@ -18,6 +18,7 @@ export type MappedAnime = {
   startDate: string | null;
   coverUrl: string | null;
   bannerUrl: string | null;
+  latestAiredEpisode: number | null;
 };
 
 const STATUS: Record<string, AnimeStatus> = {
@@ -34,6 +35,14 @@ const SEASON: Record<string, MappedAnime["season"]> = {
   SUMMER: "summer",
   FALL: "fall",
 };
+
+// Episode before the next one AniList expects. Finished titles have aired every episode.
+export function latestAired(media: Pick<AniListMedia, "nextAiringEpisode" | "status" | "episodes">): number | null {
+  const next = media.nextAiringEpisode?.episode;
+  if (next) return Math.max(next - 1, 0);
+  if (media.status === "FINISHED" && media.episodes) return media.episodes;
+  return null;
+}
 
 export function mapStatus(value: string | null): AnimeStatus {
   return (value && STATUS[value]) || "upcoming";
@@ -65,6 +74,7 @@ export function mapMedia(media: AniListMedia): MappedAnime | null {
     startDate,
     coverUrl: media.coverImage?.extraLarge ?? null,
     bannerUrl: media.bannerImage,
+    latestAiredEpisode: latestAired(media),
   };
 }
 

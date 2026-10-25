@@ -15,6 +15,27 @@
       "when": 1792885036865,
       "tag": "0001_feature_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792890290368,
+      "tag": "0002_user_profile",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792892839561,
+      "tag": "0003_series_and_proposals",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792893035637,
+      "tag": "0004_drop_legacy_drafts",
+      "breakpoints": true
     }
   ]
 }

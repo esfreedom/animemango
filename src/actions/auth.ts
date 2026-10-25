@@ -1,31 +1,28 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { routing } from "@/i18n/routing";
 import { createSupabaseServerClient, isAuthConfigured } from "@/lib/supabase/server";
-import type { ActionResult } from "./shared";
+import { getSiteUrl } from "@/lib/site";
+import { parseLocale } from "./shared";
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-// Sends a one-time sign-in link by email (Supabase email OTP).
-export async function sendSignInLink(
-  _previous: ActionResult | null,
-  formData: FormData,
-): Promise<ActionResult> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+// Starts sign-in with Google. The first sign-in creates the account, so there is
+// no separate sign-up step and no email to type.
+export async function signInWithGoogle(formData: FormData) {
   const locale = parseLocale(formData.get("locale"));
+  if (!isAuthConfigured()) redirect(`/${locale}/login?error=not_configured`);
 
-  if (!EMAIL_PATTERN.test(email)) return { ok: false, error: "invalid_email" };
-  if (!isAuthConfigured()) return { ok: false, error: "not_configured" };
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: `${siteUrl}/auth/callback?next=/${locale}` },
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${getSiteUrl()}/auth/callback?next=/${locale}`,
+      // Lets the person choose which Google account to use.
+      queryParams: { prompt: "select_account" },
+    },
   });
 
-  return error ? { ok: false, error: "send_failed" } : { ok: true };
+  if (error || !data.url) redirect(`/${locale}/login?error=oauth_failed`);
+  redirect(data.url);
 }
 
 export async function signOut(formData: FormData) {
@@ -35,9 +32,4 @@ export async function signOut(formData: FormData) {
     await supabase.auth.signOut();
   }
   redirect(`/${locale}`);
-}
-
-function parseLocale(value: FormDataEntryValue | null): string {
-  const candidate = String(value ?? "");
-  return (routing.locales as readonly string[]).includes(candidate) ? candidate : routing.defaultLocale;
 }

@@ -46,11 +46,19 @@ export const availabilityEventEnum = pgEnum("availability_event", [
   "changed",
   "removed",
 ]);
-export const aiDraftStatusEnum = pgEnum("ai_draft_status", [
-  "draft",
-  "reviewed",
-  "published",
+export const entryKindEnum = pgEnum("entry_kind", ["tv", "movie", "ova", "special"]);
+export const proposalKindEnum = pgEnum("proposal_kind", [
+  "metadata",
+  "grouping",
+  "season_label",
+  "availability",
+  "announcement",
+]);
+export const proposalStatusEnum = pgEnum("proposal_status", [
+  "pending",
+  "approved",
   "rejected",
+  "applied",
 ]);
 export const userRoleEnum = pgEnum("user_role", ["user", "moderator", "admin"]);
 
@@ -58,11 +66,17 @@ const createdAt = () =>
   timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 
 export const users = pgTable("users", {
-  // Matches auth.users.id in Supabase Auth.
+  // Matches auth.users.id in Supabase Auth. The email stays in Supabase and is never copied here.
   id: uuid("id").primaryKey(),
   username: text("username").notNull().unique(),
+  // Taken from the Google profile on each sign-in, so the public name stays current.
+  displayName: text("display_name"),
+  avatarUrl: text("avatar_url"),
   locale: text("locale").notNull().default("th"),
   timezone: text("timezone").notNull().default("Asia/Bangkok"),
+  // Playback language preferences. Signed-in users keep them here, guests use a cookie.
+  preferredAudio: text("preferred_audio"),
+  preferredSub: text("preferred_sub"),
   role: userRoleEnum("role").notNull().default("user"),
   createdAt: createdAt(),
 });
@@ -77,12 +91,29 @@ export const takedownStatusEnum = pgEnum("takedown_status", [
   "rejected",
 ]);
 
+// A franchise such as "Jujutsu Kaisen". Its entries are seasons, movies and specials.
+export const series = pgTable("series", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull().unique(),
+  titleRomaji: text("title_romaji").notNull(),
+  anilistRootId: integer("anilist_root_id").unique(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const anime = pgTable(
   "anime",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     slug: text("slug").notNull().unique(),
     titleRomaji: text("title_romaji").notNull(),
+    seriesId: uuid("series_id").references(() => series.id, { onDelete: "set null" }),
+    entryKind: entryKindEnum("entry_kind").notNull().default("tv"),
+    // "SS1", "SS2". Set only when the series has more than one TV season.
+    seasonLabel: text("season_label"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    // From AniList nextAiringEpisode. Episode rows only cover the sync window, so this is the
+    // source for the EP badge.
+    latestAiredEpisode: integer("latest_aired_episode"),
     malId: integer("mal_id").unique(),
     anilistId: integer("anilist_id").unique(),
     status: animeStatusEnum("status").notNull().default("upcoming"),
@@ -96,7 +127,7 @@ export const anime = pgTable(
     anilistSyncedAt: timestamp("anilist_synced_at", { withTimezone: true }),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("anime_status_idx").on(t.status)],
+  (t) => [index("anime_status_idx").on(t.status), index("anime_series_idx").on(t.seriesId)],
 );
 
 export const animeI18n = pgTable(
@@ -183,6 +214,10 @@ export const platformAvailability = pgTable(
     subLangs: text("sub_langs").array().notNull().default(sql`'{}'`),
     availableFrom: timestamp("available_from", { withTimezone: true }),
     availableTo: timestamp("available_to", { withTimezone: true }),
+    // Which episodes the platform has. END needs full coverage (DESIGN.md section 7).
+    coversAllEpisodes: boolean("covers_all_episodes").notNull().default(false),
+    episodeFrom: integer("episode_from"),
+    episodeTo: integer("episode_to"),
     sourceUrl: text("source_url").notNull(),
     verifiedAt: timestamp("verified_at", { withTimezone: true }).notNull(),
     verifiedBy: uuid("verified_by").references(() => users.id),
@@ -285,23 +320,29 @@ export const commentReport = pgTable(
   (t) => [uniqueIndex("comment_report_once_uq").on(t.commentId, t.userId)],
 );
 
-export const aiDraft = pgTable(
-  "ai_draft",
+// Everything the AI proposes goes through this queue. The AI never writes to the public
+// tables directly (see src/ai/policy.ts). Each row keeps its sources and model version.
+export const proposal = pgTable(
+  "proposal",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    animeId: uuid("anime_id")
-      .notNull()
-      .references(() => anime.id, { onDelete: "cascade" }),
-    fields: jsonb("fields").notNull(),
+    kind: proposalKindEnum("kind").notNull(),
+    animeId: uuid("anime_id").references(() => anime.id, { onDelete: "cascade" }),
+    seriesId: uuid("series_id").references(() => series.id, { onDelete: "cascade" }),
+    payload: jsonb("payload").notNull(),
     sources: jsonb("sources").notNull(),
     aiModel: text("ai_model").notNull(),
     promptVersion: text("prompt_version").notNull(),
-    status: aiDraftStatusEnum("status").notNull().default("draft"),
+    status: proposalStatusEnum("status").notNull().default("pending"),
+    autoApplied: boolean("auto_applied").notNull().default(false),
     reviewedBy: uuid("reviewed_by").references(() => users.id),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
     createdAt: createdAt(),
   },
-  (t) => [index("ai_draft_status_idx").on(t.status)],
+  (t) => [
+    index("proposal_status_kind_idx").on(t.status, t.kind),
+    index("proposal_anime_idx").on(t.animeId),
+  ],
 );
 
 // Channels whose trailers may be embedded. Only admins add rows here (DESIGN.md section 1).

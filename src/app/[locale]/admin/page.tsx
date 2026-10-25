@@ -6,9 +6,9 @@ import {
   addPlatform,
   addTrailer,
   addWatchOrderEntry,
-  approveDraft,
+  approveProposal,
   endAvailability,
-  rejectDraft,
+  rejectProposal,
   setTakedownStatus,
 } from "@/actions/admin";
 import { setCommentStatus } from "@/actions/comments";
@@ -21,7 +21,7 @@ import {
   getActiveAvailability,
   getOfficialChannels,
   getOpenTakedowns,
-  getPendingDrafts,
+  getPendingProposals,
 } from "@/data/admin";
 import { preparePage } from "@/lib/page";
 import { canModerate, getCurrentUser, isAdmin } from "@/lib/session";
@@ -85,8 +85,8 @@ export default async function AdminPage({ params }: PageProps<"/[locale]/admin">
 
 async function AdminOnly() {
   const t = await getTranslations("admin");
-  const [drafts, takedowns, availability, channels, platforms] = await Promise.all([
-    getPendingDrafts(),
+  const [proposals, takedowns, availability, channels, platforms] = await Promise.all([
+    getPendingProposals(),
     getOpenTakedowns(),
     getActiveAvailability(),
     getOfficialChannels(),
@@ -95,36 +95,51 @@ async function AdminOnly() {
 
   return (
     <>
-      <Section id="drafts" title={t("drafts")}>
-        {drafts.length === 0 ? (
+      <Section id="proposals" title={t("drafts")}>
+        {proposals.length === 0 ? (
           <EmptyState message={t("draftsEmpty")} />
         ) : (
           <ul className="space-y-4">
-            {drafts.map((draft) => {
-              const fields = draft.fields as { titleTh?: string | null; synopsisTh?: string | null; errors?: string[] };
+            {proposals.map((item) => {
+              const payload = item.payload as { titleTh?: string | null; synopsisTh?: string | null };
+              const label = item.animeTitle ?? item.seriesTitle ?? "";
               return (
-                <li key={draft.id} className="space-y-3 rounded-lg border border-line bg-surface p-4">
+                <li key={item.id} className="space-y-3 rounded-lg border border-line bg-surface p-4">
                   <p className="text-sm text-muted">
-                    {draft.animeTitle} · {draft.aiModel} · {draft.promptVersion}
+                    {item.kind} · {label} · {item.aiModel} · {item.promptVersion}
                   </p>
-                  <form action={approveDraft} className="grid gap-2 md:grid-cols-2">
-                    <input type="hidden" name="draftId" value={draft.id} />
-                    <label className="flex flex-col gap-1 text-xs text-muted">
-                      {t("titleField")}
-                      <input name="titleTh" defaultValue={fields.titleTh ?? ""} className={inputClass} />
-                    </label>
-                    <label className="flex flex-col gap-1 text-xs text-muted">
-                      {t("synopsisField")}
-                      <textarea name="synopsisTh" defaultValue={fields.synopsisTh ?? ""} rows={3} className="rounded-md border border-line bg-canvas px-3 py-2 text-sm text-ink" />
-                    </label>
-                    <div className="flex gap-2 md:col-span-2">
-                      <button type="submit" className={primaryClass}>
-                        {t("approve")}
-                      </button>
-                    </div>
-                  </form>
-                  <form action={rejectDraft}>
-                    <input type="hidden" name="draftId" value={draft.id} />
+                  {item.kind === "metadata" ? (
+                    <form action={approveProposal} className="grid gap-2 md:grid-cols-2">
+                      <input type="hidden" name="proposalId" value={item.id} />
+                      <label className="flex flex-col gap-1 text-xs text-muted">
+                        {t("titleField")}
+                        <input name="titleTh" defaultValue={payload.titleTh ?? ""} className={inputClass} />
+                      </label>
+                      <label className="flex flex-col gap-1 text-xs text-muted">
+                        {t("synopsisField")}
+                        <textarea name="synopsisTh" defaultValue={payload.synopsisTh ?? ""} rows={3} className="rounded-md border border-line bg-canvas px-3 py-2 text-sm text-ink" />
+                      </label>
+                      <div className="flex gap-2 md:col-span-2">
+                        <button type="submit" className={primaryClass}>
+                          {t("approve")}
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <>
+                      <pre className="max-h-60 overflow-auto rounded bg-canvas p-3 text-xs text-muted">
+                        {JSON.stringify(item.payload, null, 2)}
+                      </pre>
+                      <form action={approveProposal}>
+                        <input type="hidden" name="proposalId" value={item.id} />
+                        <button type="submit" className={primaryClass}>
+                          {t("approve")}
+                        </button>
+                      </form>
+                    </>
+                  )}
+                  <form action={rejectProposal}>
+                    <input type="hidden" name="proposalId" value={item.id} />
                     <button type="submit" className={buttonClass}>
                       {t("reject")}
                     </button>

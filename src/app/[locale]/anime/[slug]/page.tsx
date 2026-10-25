@@ -73,7 +73,7 @@ export default async function AnimePage({ params, searchParams }: Props) {
   const data = await getAnimeBySlug(slug);
   if (!data) notFound();
 
-  const { anime: row, titles, episodes, trailers, seasons, threadId } = data;
+  const { anime: row, series: parent, titles, episodes, trailers, seasons, threadId } = data;
 
   const [availability, user, followers] = await Promise.all([
     getAvailabilityForAnime(row.id),
@@ -90,6 +90,7 @@ export default async function AnimePage({ params, searchParams }: Props) {
   const tEpisode = await getTranslations("episode");
   const tLang = await getTranslations("lang");
   const tComments = await getTranslations("comments");
+  const tSeries = await getTranslations("series");
 
   const title = resolveTitle(titles, locale, row.titleRomaji);
   const synopsis = resolveSynopsis(titles, locale);
@@ -129,6 +130,11 @@ export default async function AnimePage({ params, searchParams }: Props) {
             {title.isFallback && <Badge>{tLang("fallback")}</Badge>}
           </div>
           <h1 className="text-3xl font-bold text-ink md:text-4xl">{title.title}</h1>
+          {parent && (
+            <Link href={`/series/${parent.slug}`} className="inline-block text-sm text-muted underline-offset-4 hover:text-ink hover:underline">
+              {tSeries("title", { title: parent.titleRomaji })}
+            </Link>
+          )}
           {title.isFallback && <p className="text-sm text-muted">{row.titleRomaji}</p>}
 
           <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">

@@ -39,12 +39,15 @@ curl -H "Authorization: Bearer <CRON_SECRET>" http://localhost:3000/api/cron/syn
 
 เปิด http://localhost:3000 แล้วระบบจะพาไปหน้าภาษาไทยที่ `/th`
 
+การล็อกอินด้วย Google ต้องตั้งค่า Supabase ก่อน ดูหัวข้อด้านล่าง ถ้ายังไม่ตั้งค่า ปุ่มจะแสดงข้อความว่ายังไม่ได้ตั้งค่า
+
 ## คำสั่ง
 
 | คำสั่ง | ทำอะไร |
 |---|---|
 | `npm run dev` | เปิดเซิร์ฟเวอร์พัฒนา |
 | `npm run db:dev` | เปิดฐานข้อมูลทดลอง (PGlite) ที่พอร์ต 5433 |
+| `npm run db:migrate` | ใช้ migration ทั้งหมดในโฟลเดอร์ `drizzle/` กับ `DATABASE_URL` |
 | `npm run build` | build สำหรับ production (ไม่ต้องมีฐานข้อมูลตอน build) |
 | `npm run lint` | ตรวจ ESLint |
 | `npm run typecheck` | ตรวจ TypeScript |
@@ -56,35 +59,53 @@ curl -H "Authorization: Bearer <CRON_SECRET>" http://localhost:3000/api/cron/syn
 ```
 messages/            ข้อความ UI ทั้ง 3 ภาษา (th คือต้นฉบับ)
 src/app/[locale]/    หน้าทั้งหมด แยกตามภาษา
+src/app/auth/        callback ของการล็อกอินด้วย Google
 src/app/api/cron/    งานตั้งเวลา: sync ตารางฉาย และร่าง AI
-src/actions/         server actions (ความเห็น โหวต ติดตาม หลังบ้าน)
+src/actions/         server actions (ล็อกอิน ความเห็น โหวต ติดตาม หลังบ้าน)
 src/anilist/         client, mapper และ sync จาก AniList
 src/ai/              ร่างข้อมูลด้วย AI, validator และคิวตรวจ
 src/data/            การอ่านข้อมูล (มี cache และ tag)
 src/db/              schema, client ของ Postgres และ PGlite สำหรับเทส
+src/lib/session.ts   ผู้ใช้ปัจจุบัน และการสร้างแถวในตาราง users จากโปรไฟล์ Google
 src/content/         คู่มือ หน้าทั่วไป และ affiliate
 drizzle/             migration ที่ generate แล้ว
-scripts/dev-db.ts    ฐานข้อมูลทดลองในเครื่อง
+scripts/             ฐานข้อมูลทดลอง และตัวรัน migration
 ```
 
-## สถานะการพัฒนา
+## ล็อกอินด้วย Google
 
-โค้ดครอบคลุมเฟส P0 ถึง P7 ใน DESIGN.md แต่บางส่วนต้องรอบัญชีภายนอกก่อนใช้งานจริง
+ระบบไม่มีการกรอกอีเมลหรือรหัสผ่าน ครั้งแรกที่ล็อกอินด้วย Google ระบบจะสร้างบัญชีให้อัตโนมัติ ชื่อและรูปโปรไฟล์จะอัปเดตทุกครั้งที่ล็อกอิน ชื่อผู้ใช้ (username) สร้างจากอีเมลและไม่เปลี่ยนภายหลัง
 
-| เรื่อง | สถานะ |
-|---|---|
-| แคตตาล็อก หน้าเรื่อง หน้าตอน ค้นหา ฤดูกาล | ใช้งานได้ (ข้อมูลจาก AniList) |
-| ตารางฉาย หน้าแรกแบบฟีด เวลาไทย | ใช้งานได้ |
-| ดูได้ที่ไหน ประวัติสิทธิ์ ตัวอย่างจากช่องทางการ | ใช้งานได้ ต้องให้แอดมินกรอกข้อมูลที่ตรวจแล้ว |
-| กระทู้หลายภาษา ความเห็น รายงาน | ใช้งานได้เมื่อตั้งค่า Supabase Auth |
-| ร่าง AI และคิวตรวจ | ใช้งานได้เมื่อมี `ANTHROPIC_API_KEY` ผู้ตรวจต้องอนุมัติทุกครั้ง |
-| โปรไฟล์ ติดตาม โหวต แจ้งเตือน คู่มือ | ใช้งานได้ |
-| SEO: sitemap, robots, JSON-LD, hreflang, noindex | ใช้งานได้ |
-| Affiliate และโฆษณา | โครงสร้างพร้อม แต่ปิดอยู่ (รายการว่าง และ `NEXT_PUBLIC_ADS_ENABLED=false`) |
-| สมาชิกแบบไม่มีโฆษณา | ยังไม่ทำ ต้องมีผู้ให้บริการชำระเงิน |
-| การยินยอมคุกกี้ | ยังไม่ทำ ต้องทำก่อนเปิดโฆษณา |
+ตั้งค่าตามลำดับนี้
 
-## ข้อควรทราบเรื่องข้อมูล
+1. **Google Cloud Console**: สร้างโปรเจกต์ ตั้งค่า OAuth consent screen แล้วสร้าง OAuth client ID ชนิด Web application
+   - Authorized redirect URI: `https://<project-ref>.supabase.co/auth/v1/callback`
+   - คัดลอก Client ID และ Client secret
+2. **Supabase > Authentication > Providers > Google**: เปิดใช้งาน แล้ววาง Client ID และ Client secret
+3. **Supabase > Authentication > URL Configuration**
+   - Site URL: ค่าเดียวกับ `NEXT_PUBLIC_SITE_URL`
+   - Redirect URLs: เพิ่ม `http://localhost:3000/auth/callback` และ `https://<โดเมนจริง>/auth/callback`
+4. **Supabase > Project Settings > API**: คัดลอก URL และ anon key ใส่ใน `NEXT_PUBLIC_SUPABASE_URL` และ `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+5. รัน migration กับฐานข้อมูล Supabase แล้วรีสตาร์ตเซิร์ฟเวอร์
+
+```bash
+DATABASE_URL="<connection string ของ Supabase>" npm run db:migrate
+```
+
+หมายเหตุ
+- ระหว่างที่ OAuth consent screen ยังอยู่ในโหมด Testing จะล็อกอินได้เฉพาะบัญชีที่เพิ่มเป็น test user
+- ระบบยอมรับบัญชี Google ทุกบัญชี ไม่ได้จำกัดเฉพาะ @gmail.com ถ้าต้องการจำกัด ต้องเพิ่มการตรวจอีเมลในโค้ด
+- ก่อนเปิดใช้จริง ตรวจปุ่มล็อกอินให้เป็นไปตามแนวทางแบรนด์ของ Google
+
+## ตั้งค่าแอดมิน
+
+ผู้ใช้ใหม่ทุกคนมีบทบาท `user` หากต้องการให้บัญชีเป็นแอดมิน ให้รันคำสั่งนี้ใน SQL editor ของ Supabase โดยใช้ username จากหน้าโปรไฟล์ (`/th/u/<username>`)
+
+```sql
+update users set role = 'admin' where username = '<username>';
+```
+
+## ข้อมูลและแหล่งข้อมูล
 
 - **AniList**: เงื่อนไขการใช้งานฟรีเมื่อรายได้ไม่เกิน 150 ดอลลาร์ต่อเดือน เกินนั้นต้องขอสัญญาอนุญาต และห้ามเก็บหรือรวบรวมข้อมูลจำนวนมาก ระบบจึงดึงเฉพาะช่วงตารางฉายรอบวันนี้ (ย้อนหลัง 1 วัน ล่วงหน้า 14 วัน) และไม่เก็บเรื่องย่อของ AniList
 - **โปสเตอร์**: โหลดจาก CDN ของ AniList ตาม URL ที่ API ส่งมา ต้องตรวจเงื่อนไขการใช้รูปก่อนใช้เชิงพาณิชย์
@@ -92,6 +113,41 @@ scripts/dev-db.ts    ฐานข้อมูลทดลองในเคร�
 
 ## การนำขึ้นใช้งาน
 
-- ฐานข้อมูล: ตั้ง `DATABASE_URL` เป็น Supabase แล้วรัน migration จากโฟลเดอร์ `drizzle/`
+- ฐานข้อมูล: ตั้ง `DATABASE_URL` เป็น Supabase แล้วรัน `npm run db:migrate`
 - งานตั้งเวลา: [vercel.json](vercel.json) ตั้งให้ซิงก์ตารางฉายทุกชั่วโมง และร่าง AI ทุกชั่วโมงครึ่ง ต้องตั้ง `CRON_SECRET` ให้ตรงกับที่ Vercel ส่งมา
 - ตัวแปรทั้งหมดอยู่ใน [.env.example](.env.example)
+
+## สถานะการพัฒนา
+
+| เรื่อง | สถานะ |
+|---|---|
+| แคตตาล็อก หน้าเรื่อง หน้าตอน ค้นหา ฤดูกาล | ใช้งานได้ (ข้อมูลจาก AniList) |
+| ตารางฉาย หน้าแรกแบบฟีด เวลาไทย | ใช้งานได้ |
+| ดูได้ที่ไหน ประวัติสิทธิ์ ตัวอย่างจากช่องทางการ | ใช้งานได้ ต้องให้แอดมินกรอกข้อมูลที่ตรวจแล้ว |
+| ล็อกอินด้วย Google และกระทู้หลายภาษา | โค้ดพร้อม ทดสอบได้เมื่อตั้งค่า Supabase และ Google แล้ว |
+| ร่าง AI และคิวตรวจ | ใช้งานได้เมื่อมี `ANTHROPIC_API_KEY` ผู้ตรวจต้องอนุมัติทุกครั้ง |
+| โปรไฟล์ ติดตาม โหวต แจ้งเตือน คู่มือ | ใช้งานได้ |
+| SEO: sitemap, robots, JSON-LD, hreflang, noindex | ใช้งานได้ |
+| Affiliate และโฆษณา | โครงสร้างพร้อม แต่ปิดอยู่ (รายการว่าง และ `NEXT_PUBLIC_ADS_ENABLED=false`) |
+| สมาชิกแบบไม่มีโฆษณา | ยังไม่ทำ ต้องมีผู้ให้บริการชำระเงิน |
+| การยินยอมคุกกี้ | ยังไม่ทำ ต้องทำก่อนเปิดโฆษณา |
+
+
+## AI และการเพิ่มสิทธิ์การดู (Proposal)
+
+AI เขียนได้ผ่าน API เดียว และทุกอย่างต้องให้แอดมินอนุมัติ
+
+- `GET /api/ops/snapshot` อ่านรายการเรื่อง เอนทรี และแพลตฟอร์ม
+- `POST /api/ops/proposals` ส่ง proposal ชนิด `metadata`, `grouping`, `season_label`, `availability` หรือ `announcement`
+- ทั้งสองเส้นต้องมี `Authorization: Bearer <OPS_API_TOKEN>`
+- URL ของแหล่งข้อมูลต้องเป็น https และอยู่ใน allowlist (anilist.co, เว็บทางการของแพลตฟอร์มที่มีในตาราง และ `OFFICIAL_SOURCE_HOSTS`)
+- ป้าย END/EP คำนวณจากสิทธิ์ที่แอดมินอนุมัติแล้วเท่านั้น
+
+ตัวแปรใหม่ใน `.env.local`:
+
+```
+OPS_API_TOKEN=<สุ่มขึ้นมาใหม่>
+OFFICIAL_SOURCE_HOSTS=
+```
+
+การย้ายข้อมูลครั้งแรก: รัน `npm run db:migrate` ทุกครั้งที่มี migration ใหม่ (0003 คัดลอกข้อมูลจากตารางร่างเดิมไปยัง proposal ส่วน 0004 ลบตารางเดิม)

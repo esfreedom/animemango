@@ -6,9 +6,8 @@ import { z } from "zod";
 import { getDb } from "@/db/client";
 import {
   anime,
-  animeI18n,
   announcement,
-  aiDraft,
+  proposal,
   availabilityLog,
   officialChannel,
   platform,
@@ -18,6 +17,7 @@ import {
   watchOrderEntry,
 } from "@/db/schema";
 import { notifyFollowers } from "@/lib/notify";
+import { applyProposal } from "@/ai/apply";
 import { isAdmin, getCurrentUser } from "@/lib/session";
 import { formString } from "./shared";
 
@@ -45,69 +45,38 @@ async function animeBySlug(slug: string | undefined) {
   return row ?? null;
 }
 
-// ---- AI drafts (DESIGN.md section 8) --------------------------------------
+// ---- Proposal queue (DESIGN.md section 8, approved series plan section 6) -----
 
-export async function approveDraft(formData: FormData): Promise<void> {
+export async function approveProposal(formData: FormData): Promise<void> {
   const user = await requireAdmin();
   if (!user) throw new Error("forbidden");
 
-  const draftId = z.uuid().safeParse(formString(formData, "draftId"));
-  if (!draftId.success) throw new Error("invalid_draft");
+  const proposalId = z.uuid().safeParse(formString(formData, "proposalId"));
+  if (!proposalId.success) throw new Error("invalid_proposal");
 
   const db = getDb();
-  const [draft] = await db.select().from(aiDraft).where(eq(aiDraft.id, draftId.data)).limit(1);
-  if (!draft || draft.status !== "draft") throw new Error("draft_not_pending");
+  const [row] = await db.select().from(proposal).where(eq(proposal.id, proposalId.data)).limit(1);
+  if (!row || row.status !== "pending") throw new Error("proposal_not_pending");
 
-  const original = draft.fields as { titleTh?: string | null; synopsisTh?: string | null };
-  const titleTh = formString(formData, "titleTh") ?? original.titleTh ?? null;
-  const synopsisTh = formString(formData, "synopsisTh") ?? original.synopsisTh ?? null;
-
-  // Edited text is marked "human". Text published as drafted stays "machine".
-  const edited =
-    titleTh !== (original.titleTh ?? null) || synopsisTh !== (original.synopsisTh ?? null);
-
-  if (titleTh) {
-    await db
-      .insert(animeI18n)
-      .values({
-        animeId: draft.animeId,
-        locale: "th",
-        title: titleTh,
-        synopsis: synopsisTh,
-        source: edited ? "human" : "machine",
-        reviewedBy: user.id,
-      })
-      .onConflictDoUpdate({
-        target: [animeI18n.animeId, animeI18n.locale],
-        set: {
-          title: titleTh,
-          synopsis: synopsisTh,
-          source: edited ? "human" : "machine",
-          reviewedBy: user.id,
-        },
-      });
-  }
-
-  await db
-    .update(aiDraft)
-    .set({ status: "published", reviewedBy: user.id, reviewedAt: new Date() })
-    .where(eq(aiDraft.id, draft.id));
+  await applyProposal(db, row, user.id, {
+    titleTh: formString(formData, "titleTh"),
+    synopsisTh: formString(formData, "synopsisTh"),
+  });
 
   updateTag("anime");
 }
 
-export async function rejectDraft(formData: FormData): Promise<void> {
+export async function rejectProposal(formData: FormData): Promise<void> {
   const user = await requireAdmin();
   if (!user) throw new Error("forbidden");
 
-  const draftId = z.uuid().safeParse(formString(formData, "draftId"));
-  if (!draftId.success) throw new Error("invalid_draft");
+  const proposalId = z.uuid().safeParse(formString(formData, "proposalId"));
+  if (!proposalId.success) throw new Error("invalid_proposal");
 
   await getDb()
-    .update(aiDraft)
+    .update(proposal)
     .set({ status: "rejected", reviewedBy: user.id, reviewedAt: new Date() })
-    .where(and(eq(aiDraft.id, draftId.data), eq(aiDraft.status, "draft")));
-
+    .where(and(eq(proposal.id, proposalId.data), eq(proposal.status, "pending")));
 }
 
 // ---- Availability (DESIGN.md section 7) -----------------------------------

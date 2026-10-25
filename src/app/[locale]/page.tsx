@@ -1,38 +1,35 @@
 import { getTranslations } from "next-intl/server";
-import { PosterCard } from "@/components/anime/PosterCard";
+import { EntryCard } from "@/components/anime/EntryCard";
 import { LangTags } from "@/components/anime/LangTags";
 import { Section } from "@/components/ui/Section";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Badge } from "@/components/ui/Badge";
 import { Link } from "@/i18n/navigation";
-import {
-  getAiringBetween,
-  getAnnouncements,
-  getAvailabilityChanges,
-  getHotThreads,
-  type AiringItem,
-} from "@/data/catalog";
+import { getAnnouncements, getAvailabilityChanges, getHotThreads } from "@/data/catalog";
+import { getHomeFeed } from "@/data/feed";
 import { resolveTitle } from "@/lib/titles";
-import { bangkokDayRange, formatAirTime } from "@/lib/time";
+import { formatAirTime } from "@/lib/time";
 import { preparePage } from "@/lib/page";
-
-const DAY_MS = 24 * 60 * 60 * 1000;
+import { readPrefs } from "@/lib/prefs-server";
+import { getCurrentUser } from "@/lib/session";
+import { PrefsControl } from "@/components/prefs/PrefsControl";
 
 // Renders per request (see preparePage), so instant-navigation validation is opted out.
 export const instant = false;
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const locale = await preparePage(params);
   const t = await getTranslations("home");
   const now = new Date();
-  const today = bangkokDayRange(now);
 
-  const [airingToday, upcoming, announcements, changes, hot] = await Promise.all([
-    getAiringBetween(today.from, today.to),
-    getAiringBetween(today.to, new Date(now.getTime() + 7 * DAY_MS)),
+  const user = await getCurrentUser();
+  const [feed, announcements, changes, hot, prefs] = await Promise.all([
+    getHomeFeed(now),
     getAnnouncements(),
     getAvailabilityChanges(),
     getHotThreads(new Date(now.getTime() - DAY_MS)),
+    readPrefs(user),
   ]);
 
   return (
@@ -40,14 +37,35 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       <section className="space-y-3">
         <h1 className="text-3xl font-bold text-ink md:text-4xl">{t("title")}</h1>
         <p className="max-w-2xl text-muted">{t("subtitle")}</p>
+        <PrefsControl prefs={prefs} />
       </section>
 
-      <Section id="airing-today" title={t("sections.airingToday")}>
-        <EpisodeGrid items={airingToday} locale={locale} emptyMessage={t("empty")} />
+      <Section id="latest-updates" title={t("sections.airingToday")}>
+        {feed.updated.length === 0 ? (
+          <EmptyState message={t("empty")} />
+        ) : (
+          <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 md:gap-4">
+            {feed.updated.map((entry, index) => (
+              <li key={entry.animeId}>
+                <EntryCard entry={entry} locale={locale} now={now} mode="updated" prefs={prefs} priority={index < 6} />
+              </li>
+            ))}
+          </ul>
+        )}
       </Section>
 
       <Section id="upcoming" title={t("sections.upcoming")}>
-        <EpisodeGrid items={upcoming.slice(0, 12)} locale={locale} emptyMessage={t("empty")} />
+        {feed.upcoming.length === 0 ? (
+          <EmptyState message={t("empty")} />
+        ) : (
+          <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 md:gap-4">
+            {feed.upcoming.map((entry) => (
+              <li key={entry.animeId}>
+                <EntryCard entry={entry} locale={locale} now={now} mode="upcoming" prefs={prefs} />
+              </li>
+            ))}
+          </ul>
+        )}
       </Section>
 
       <Section id="announcements" title={t("sections.announcements")}>
@@ -114,45 +132,6 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         )}
       </Section>
     </div>
-  );
-}
-
-async function EpisodeGrid({
-  items,
-  locale,
-  emptyMessage,
-}: {
-  items: AiringItem[];
-  locale: string;
-  emptyMessage: string;
-}) {
-  const t = await getTranslations("episode");
-  const tStatus = await getTranslations("status");
-
-  if (items.length === 0) return <EmptyState message={emptyMessage} />;
-
-  return (
-    <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 md:gap-4">
-      {items.map((item, index) => {
-        const title = resolveTitle(item.titles, locale, item.titleRomaji);
-        return (
-          <li key={`${item.slug}-${item.number}`}>
-            <PosterCard
-              href={`/anime/${item.slug}/ep/${item.number}`}
-              title={title.title}
-              coverUrl={item.coverUrl}
-              priority={index < 6}
-              meta={`${t("title", { number: item.number })} · ${formatAirTime(item.airAtUtc, locale, "Asia/Bangkok")}`}
-              tags={
-                <span className="flex flex-wrap gap-1">
-                  <Badge>{tStatus(item.status as "scheduled" | "aired" | "delayed")}</Badge>
-                </span>
-              }
-            />
-          </li>
-        );
-      })}
-    </ul>
   );
 }
 

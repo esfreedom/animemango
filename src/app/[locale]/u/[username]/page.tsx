@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
@@ -23,11 +24,28 @@ export default async function ProfilePage({ params }: PageProps<"/[locale]/u/[us
 
   return (
     <div className="space-y-10">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold text-ink">{t("title", { username: profile.user.username })}</h1>
-        <p className="text-sm text-muted">
-          {t("joined", { date: formatAirTime(profile.user.createdAt, locale, "Asia/Bangkok") })}
-        </p>
+      <header className="flex items-center gap-4">
+        {profile.user.avatarUrl ? (
+          <Image
+            src={profile.user.avatarUrl}
+            alt=""
+            width={64}
+            height={64}
+            className="h-16 w-16 rounded-full border border-line object-cover"
+          />
+        ) : (
+          <span aria-hidden="true" className="flex h-16 w-16 items-center justify-center rounded-full border border-line bg-raised text-xl text-muted">
+            {profile.user.username.charAt(0).toUpperCase()}
+          </span>
+        )}
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold text-ink">
+            {t("title", { username: profile.user.displayName ?? profile.user.username })}
+          </h1>
+          <p className="text-sm text-muted">
+            @{profile.user.username} · {t("joined", { date: formatAirTime(profile.user.createdAt, locale, "Asia/Bangkok") })}
+          </p>
+        </div>
       </header>
 
       <Section id="profile-follows" title={t("follows")}>
