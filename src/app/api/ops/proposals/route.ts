@@ -5,6 +5,7 @@ import { anime, platform, proposal, series } from "@/db/schema";
 import { parseProposalPayload } from "@/ai/proposals";
 import { decideProposal, allowedHostsFrom, isAllowedSourceUrl, PROPOSAL_KINDS } from "@/ai/policy";
 import { checkOpsToken } from "@/lib/ops-auth";
+import { isOfficialTitleSource } from "@/ai/official-title";
 
 // The AI writes proposals here and nothing else. A person approves them in /admin.
 // Every proposal is stored as pending or rejected. None is applied by this route.
@@ -52,6 +53,13 @@ export async function POST(request: Request) {
   const sourceUrls = [...sources.map((item) => item.url), ...(parsed.ok ? parsed.value.sourceUrls : [])];
   const disallowed = sourceUrls.filter((url) => !isAllowedSourceUrl(url, allowedHosts));
   errors.push(...disallowed.map((url) => `source_not_allowed: ${url}`));
+
+  if (parsed.ok && kind === "metadata" && parsed.value.payload.titleTh) {
+    const titleSourceUrl = parsed.value.payload.titleSourceUrl;
+    if (typeof titleSourceUrl !== "string" || !isOfficialTitleSource(titleSourceUrl, allowedHosts)) {
+      errors.push("title_source_not_official");
+    }
+  }
 
   if (parsed.ok && kind === "availability") {
     const platformName = String(parsed.value.payload.platformName);

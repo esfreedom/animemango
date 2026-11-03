@@ -1,7 +1,9 @@
 import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, or } from "drizzle-orm";
 import { getDb } from "@/db/client";
-import { anime, animeI18n, episode, platform, platformAvailability, series } from "@/db/schema";
+import { anime, animeI18n, animeStudio, episode, platform, platformAvailability, series, studio } from "@/db/schema";
 import { computeCornerBadge, resolveLatestAired, type BadgeAvailability, type BadgeEpisode, type CornerBadge } from "@/lib/badge";
+import { groupIntoSeriesCards, type SeriesCard } from "@/lib/series-cards";
+import { studioDisplayName } from "@/lib/studio-name";
 import type { TitleRow } from "@/lib/titles";
 
 // Home feed and series pages. These are not cached, because the answer depends on the current
@@ -37,7 +39,13 @@ export type FeedEntry = {
   nextEpisode: number | null;
 };
 
-export async function getHomeFeed(now: Date): Promise<{ updated: FeedEntry[]; upcoming: FeedEntry[] }> {
+export type StudioChip = { slug: string; name: string };
+
+export type SeriesHomeCard = SeriesCard<FeedEntry> & { studios: StudioChip[] };
+
+// Home cards, one per series: most recently aired first, then series with only upcoming episodes.
+// Each card is built from the episodes inside the window around now.
+export async function getSeriesHomeFeed(now: Date): Promise<SeriesHomeCard[]> {
   const db = getDb();
   const windowFrom = new Date(now.getTime() - WINDOW_MS);
   const windowTo = new Date(now.getTime() + WINDOW_MS);
@@ -60,41 +68,59 @@ export async function getHomeFeed(now: Date): Promise<{ updated: FeedEntry[]; up
     byAnime.set(row.animeId, [...(byAnime.get(row.animeId) ?? []), { number: row.number, airAtUtc: row.airAtUtc }]);
   }
 
-  const updatedIds: { id: string; lastAiredAt: Date }[] = [];
-  const upcomingIds: { id: string; nextAirAt: Date; nextEpisode: number }[] = [];
-  for (const [id, list] of byAnime) {
+  const ids = [...byAnime.keys()];
+  const [entries, studios] = await Promise.all([loadEntries(ids, now, byAnime), loadStudios(ids)]);
+
+  // Each entry gets its own last-aired and next-airing values from the window.
+  const sources = [...entries.values()].map((entry) => {
+    const list = byAnime.get(entry.animeId) ?? [];
     const aired = list.filter((item) => item.airAtUtc.getTime() <= now.getTime());
-    const next = list.filter((item) => item.airAtUtc.getTime() > now.getTime());
-    if (aired.length > 0) {
-      const last = aired[aired.length - 1];
-      updatedIds.push({ id, lastAiredAt: last.airAtUtc });
-    }
-    if (next.length > 0) {
-      upcomingIds.push({ id, nextAirAt: next[0].airAtUtc, nextEpisode: next[0].number });
-    }
+    const next = list.find((item) => item.airAtUtc.getTime() > now.getTime());
+    return {
+      ...entry,
+      lastAiredAt: aired[aired.length - 1]?.airAtUtc ?? null,
+      nextAirAt: next?.airAtUtc ?? null,
+      nextEpisode: next?.number ?? null,
+    };
+  });
+
+  return groupIntoSeriesCards(sources, now)
+    .slice(0, 12)
+    .map((card) => ({
+      ...card,
+      studios: uniqueStudios(card.members.flatMap((member) => studios.get(member.animeId) ?? [])),
+    }));
+}
+
+// Studios per anime, for the chips on home cards. A title can have several studios.
+async function loadStudios(ids: string[]): Promise<Map<string, StudioChip[]>> {
+  const result = new Map<string, StudioChip[]>();
+  if (ids.length === 0) return result;
+
+  const rows = await getDb()
+    .select({
+      animeId: animeStudio.animeId,
+      slug: studio.slug,
+      nameRomaji: studio.nameRomaji,
+      nameTh: studio.nameTh,
+      nameThSourceUrl: studio.nameThSourceUrl,
+    })
+    .from(animeStudio)
+    .innerJoin(studio, eq(animeStudio.studioId, studio.id))
+    .where(inArray(animeStudio.animeId, ids));
+
+  for (const row of rows) {
+    result.set(row.animeId, [...(result.get(row.animeId) ?? []), { slug: row.slug, name: studioDisplayName(row) }]);
   }
+  return result;
+}
 
-  updatedIds.sort((a, b) => b.lastAiredAt.getTime() - a.lastAiredAt.getTime());
-  const updatedLimited = updatedIds.slice(0, 12);
-  const updatedSet = new Set(updatedLimited.map((item) => item.id));
-  const upcomingLimited = upcomingIds
-    .filter((item) => !updatedSet.has(item.id))
-    .sort((a, b) => a.nextAirAt.getTime() - b.nextAirAt.getTime())
-    .slice(0, 12);
-
-  const ids = [...updatedLimited.map((item) => item.id), ...upcomingLimited.map((item) => item.id)];
-  const entries = await loadEntries(ids, now, byAnime);
-
-  return {
-    updated: updatedLimited.flatMap((item) => {
-      const entry = entries.get(item.id);
-      return entry ? [{ ...entry, lastAiredAt: item.lastAiredAt }] : [];
-    }),
-    upcoming: upcomingLimited.flatMap((item) => {
-      const entry = entries.get(item.id);
-      return entry ? [{ ...entry, nextAirAt: item.nextAirAt, nextEpisode: item.nextEpisode }] : [];
-    }),
-  };
+function uniqueStudios(list: StudioChip[]): StudioChip[] {
+  const bySlug = new Map<string, StudioChip>();
+  for (const item of list) {
+    if (!bySlug.has(item.slug)) bySlug.set(item.slug, item);
+  }
+  return [...bySlug.values()];
 }
 
 // Full data for one series: every entry in order, with titles and platform rows.
@@ -159,7 +185,14 @@ async function loadEntries(
       .leftJoin(series, eq(anime.seriesId, series.id))
       .where(inArray(anime.id, ids)),
     db
-      .select({ animeId: animeI18n.animeId, locale: animeI18n.locale, title: animeI18n.title, source: animeI18n.source, synopsis: animeI18n.synopsis })
+      .select({
+        animeId: animeI18n.animeId,
+        locale: animeI18n.locale,
+        title: animeI18n.title,
+        source: animeI18n.source,
+        sourceUrl: animeI18n.sourceUrl,
+        synopsis: animeI18n.synopsis,
+      })
       .from(animeI18n)
       .where(inArray(animeI18n.animeId, ids)),
     db
@@ -190,7 +223,7 @@ async function loadEntries(
   for (const row of titleRows) {
     titlesByAnime.set(row.animeId, [
       ...(titlesByAnime.get(row.animeId) ?? []),
-      { locale: row.locale, title: row.title, synopsis: row.synopsis, source: row.source },
+      { locale: row.locale, title: row.title, synopsis: row.synopsis, source: row.source, sourceUrl: row.sourceUrl },
     ]);
   }
 

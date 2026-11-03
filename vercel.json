@@ -1,6 +1,16 @@
 {
   "crons": [
-    { "path": "/api/cron/sync", "schedule": "0 * * * *" },
-    { "path": "/api/cron/drafts", "schedule": "30 * * * *" }
+    {
+      "path": "/api/cron/sync",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/drafts",
+      "schedule": "30 * * * *"
+    },
+    {
+      "path": "/api/cron/seo-audit",
+      "schedule": "15 * * * *"
+    }
   ]
 }

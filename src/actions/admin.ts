@@ -6,10 +6,11 @@ import { z } from "zod";
 import { getDb } from "@/db/client";
 import {
   anime,
+  animeI18n,
   announcement,
   proposal,
   availabilityLog,
-  officialChannel,
+  studioChannel,
   platform,
   platformAvailability,
   takedownRequest,
@@ -17,7 +18,10 @@ import {
   watchOrderEntry,
 } from "@/db/schema";
 import { notifyFollowers } from "@/lib/notify";
+import { allowedHostsFrom } from "@/ai/policy";
 import { applyProposal } from "@/ai/apply";
+import { canEmbedTrailer, isYoutubeVideoId } from "@/lib/trailer";
+import { validateOfficialTitle } from "@/ai/official-title";
 import { isAdmin, getCurrentUser } from "@/lib/session";
 import { formString } from "./shared";
 
@@ -63,6 +67,49 @@ export async function approveProposal(formData: FormData): Promise<void> {
     synopsisTh: formString(formData, "synopsisTh"),
   });
 
+  updateTag("anime");
+}
+
+// Saves the official Thai name of a title. The source must be a checkable official page, and AniList
+// is refused. The admin who saves it is recorded as the reviewer.
+export async function setOfficialTitle(formData: FormData): Promise<void> {
+  const user = await requireAdmin();
+  if (!user) throw new Error("forbidden");
+
+  const target = await animeBySlug(formString(formData, "animeSlug"));
+  if (!target) throw new Error("anime_not_found");
+
+  const db = getDb();
+  const platforms = await db.select({ officialUrl: platform.officialUrl }).from(platform);
+  const allowedHosts = allowedHostsFrom(platforms.map((item) => item.officialUrl), process.env.OFFICIAL_SOURCE_HOSTS);
+
+  const checked = validateOfficialTitle(
+    { titleTh: formString(formData, "titleTh") ?? "", sourceUrl: formString(formData, "sourceUrl") ?? "" },
+    allowedHosts,
+  );
+  if (!checked.ok) throw new Error(checked.errors.join(","));
+
+  await db
+    .insert(animeI18n)
+    .values({
+      animeId: target.id,
+      locale: "th",
+      title: checked.titleTh,
+      source: "official",
+      sourceUrl: formString(formData, "sourceUrl") ?? null,
+      reviewedBy: user.id,
+    })
+    .onConflictDoUpdate({
+      target: [animeI18n.animeId, animeI18n.locale],
+      set: {
+        title: checked.titleTh,
+        source: "official",
+        sourceUrl: formString(formData, "sourceUrl") ?? null,
+        reviewedBy: user.id,
+      },
+    });
+
+  updateTag(`anime:${target.slug}`);
   updateTag("anime");
 }
 
@@ -187,53 +234,28 @@ export async function endAvailability(formData: FormData): Promise<void> {
   updateTag("anime");
 }
 
-const channelSchema = z.object({
-  channelId: z.string().trim().min(3).max(64),
-  name: z.string().trim().min(1).max(120),
-  evidenceUrl: z.url(),
-});
+
 
 // Only channels added here can have their trailers embedded (DESIGN.md section 1).
-export async function addOfficialChannel(formData: FormData): Promise<void> {
-  const user = await requireAdmin();
-  if (!user) throw new Error("forbidden");
-
-  const parsed = channelSchema.safeParse({
-    channelId: formString(formData, "channelId"),
-    name: formString(formData, "name"),
-    evidenceUrl: formString(formData, "evidenceUrl"),
-  });
-  if (!parsed.success) throw new Error("invalid_form");
-
-  await getDb()
-    .insert(officialChannel)
-    .values({ ...parsed.data, verifiedBy: user.id })
-    .onConflictDoUpdate({
-      target: officialChannel.channelId,
-      set: { name: parsed.data.name, evidenceUrl: parsed.data.evidenceUrl, verifiedBy: user.id, verifiedAt: new Date() },
-    });
-
-  updateTag("anime");
-}
-
 export async function addTrailer(formData: FormData): Promise<void> {
   const user = await requireAdmin();
   if (!user) throw new Error("forbidden");
 
   const youtubeId = formString(formData, "youtubeId") ?? "";
   const channelId = formString(formData, "channelId") ?? "";
-  if (!/^[A-Za-z0-9_-]{6,20}$/.test(youtubeId) || channelId.length < 3) {
+  if (!isYoutubeVideoId(youtubeId) || channelId.length < 3) {
     throw new Error("invalid_form");
   }
 
   const target = await animeBySlug(formString(formData, "animeSlug"));
   if (!target) throw new Error("anime_not_found");
 
+  // The channel must already exist as a studio channel. Its status decides whether the trailer shows.
   const db = getDb();
   const [channel] = await db
-    .select({ channelId: officialChannel.channelId })
-    .from(officialChannel)
-    .where(eq(officialChannel.channelId, channelId))
+    .select({ id: studioChannel.id, status: studioChannel.status, allowTrailer: studioChannel.allowTrailer })
+    .from(studioChannel)
+    .where(and(eq(studioChannel.platform, "youtube"), eq(studioChannel.channelId, channelId)))
     .limit(1);
 
   await db
@@ -242,11 +264,17 @@ export async function addTrailer(formData: FormData): Promise<void> {
       animeId: target.id,
       youtubeId,
       channelId,
-      channelVerified: Boolean(channel),
+      channelVerified: canEmbedTrailer(channel ?? null),
+      studioChannelId: channel?.id ?? null,
     })
     .onConflictDoUpdate({
       target: trailer.youtubeId,
-      set: { animeId: target.id, channelId, channelVerified: Boolean(channel) },
+      set: {
+        animeId: target.id,
+        channelId,
+        channelVerified: canEmbedTrailer(channel ?? null),
+        studioChannelId: channel?.id ?? null,
+      },
     });
 
   updateTag(`anime:${target.slug}`);

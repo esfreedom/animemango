@@ -10,6 +10,15 @@ export type DisplayTimeZone = (typeof DISPLAY_TIME_ZONES)[number];
 
 export const DEFAULT_TIME_ZONE: DisplayTimeZone = "Asia/Bangkok";
 
+// Keys in the "timezones" messages, one per option.
+export const TIME_ZONE_LABEL_KEY: Record<DisplayTimeZone, "bangkok" | "tokyo" | "utc" | "london" | "new_york"> = {
+  "Asia/Bangkok": "bangkok",
+  "Asia/Tokyo": "tokyo",
+  UTC: "utc",
+  "Europe/London": "london",
+  "America/New_York": "new_york",
+};
+
 export function parseTimeZone(value: string | undefined): DisplayTimeZone {
   return (DISPLAY_TIME_ZONES as readonly string[]).includes(value ?? "")
     ? (value as DisplayTimeZone)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasThaiContent, resolveSynopsis, resolveTitle } from "./titles";
+import { hasThaiContent, resolveSynopsis, resolveTitle, resolveTitleSource } from "./titles";
 import { currentSeason, seasonSlug } from "./slug";
 
 const TITLES = [
@@ -41,9 +41,22 @@ describe("resolveSynopsis", () => {
 });
 
 describe("hasThaiContent", () => {
-  it("is true only when a Thai title exists", () => {
+  it("is true only when an official Thai title exists", () => {
     expect(hasThaiContent(TITLES)).toBe(false);
-    expect(hasThaiContent([...TITLES, { locale: "th", title: "ตัวอย่าง", source: "human" }])).toBe(true);
+    expect(hasThaiContent([...TITLES, { locale: "th", title: "ตัวอย่าง", source: "human" }])).toBe(false);
+    expect(
+      hasThaiContent([...TITLES, { locale: "th", title: "ตัวอย่าง", source: "official", sourceUrl: "https://www.netflix.com/th" }]),
+    ).toBe(true);
+  });
+
+  it("shows a Thai title only when it is official, and names its source", () => {
+    const unofficial = [...TITLES, { locale: "th", title: "ชื่อร่าง", source: "machine", sourceUrl: null }];
+    expect(resolveTitle(unofficial, "th", "Sample Romaji")).toEqual({ title: "Sample Show", isFallback: true, locale: "en" });
+
+    const official = [...TITLES, { locale: "th", title: "ชื่อทางการ", source: "official", sourceUrl: "https://www.netflix.com/th/title/1" }];
+    expect(resolveTitle(official, "th", "Sample Romaji")).toEqual({ title: "ชื่อทางการ", isFallback: false, locale: "th" });
+    expect(resolveTitleSource(official, "th")).toBe("https://www.netflix.com/th/title/1");
+    expect(resolveTitleSource(official, "en")).toBeNull();
   });
 });
 

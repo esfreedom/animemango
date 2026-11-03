@@ -8,7 +8,7 @@ const SYSTEM_PROMPT = `You write draft Thai metadata for an anime information si
 Use only the facts in the input JSON. Do not add plot details, cast, staff, dates, or episode counts that the input does not contain. If you cannot support a field, return null for it.
 
 Return only one JSON object with exactly these keys:
-- "titleTh": Thai title, or null
+- "titleTh": always null. Thai titles are official names, so people add them from official sources
 - "synopsisTh": one or two neutral Thai sentences that describe only the format, episode count, start date and genres. No spoilers. Or null.
 - "genresTh": Thai names for the genres in the input
 - "unknownFields": the input fields you could not use

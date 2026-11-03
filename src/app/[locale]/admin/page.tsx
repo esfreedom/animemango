@@ -1,14 +1,15 @@
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import {
   addAnnouncement,
   addAvailability,
-  addOfficialChannel,
   addPlatform,
   addTrailer,
   addWatchOrderEntry,
   approveProposal,
   endAvailability,
   rejectProposal,
+  setOfficialTitle,
   setTakedownStatus,
 } from "@/actions/admin";
 import { setCommentStatus } from "@/actions/comments";
@@ -19,7 +20,6 @@ import { getPlatforms } from "@/data/catalog";
 import { getRecentReports } from "@/data/community";
 import {
   getActiveAvailability,
-  getOfficialChannels,
   getOpenTakedowns,
   getPendingProposals,
 } from "@/data/admin";
@@ -85,11 +85,10 @@ export default async function AdminPage({ params }: PageProps<"/[locale]/admin">
 
 async function AdminOnly() {
   const t = await getTranslations("admin");
-  const [proposals, takedowns, availability, channels, platforms] = await Promise.all([
+  const [proposals, takedowns, availability, platforms] = await Promise.all([
     getPendingProposals(),
     getOpenTakedowns(),
     getActiveAvailability(),
-    getOfficialChannels(),
     getPlatforms(),
   ]);
 
@@ -181,20 +180,29 @@ async function AdminOnly() {
         )}
       </Section>
 
-      <Section id="channels" title={t("channels")}>
-        <ul className="space-y-1 text-sm text-muted">
-          {channels.map((channel) => (
-            <li key={channel.channelId}>
-              {channel.name} ({channel.channelId})
-            </li>
-          ))}
-        </ul>
-        <form action={addOfficialChannel} className="grid gap-2 md:grid-cols-4">
-          <input name="channelId" placeholder={t("channelId")} required className={inputClass} />
-          <input name="name" placeholder={t("channelName")} required className={inputClass} />
-          <input name="evidenceUrl" type="url" placeholder={t("evidenceUrl")} required className={inputClass} />
-          <button type="submit" className={primaryClass}>{t("addChannel")}</button>
+      <Section id="official-titles" title={t("officialTitle")}>
+        <p className="text-sm text-muted">{t("officialTitleHelp")}</p>
+        <form action={setOfficialTitle} className="grid gap-2 md:grid-cols-3">
+          <input name="animeSlug" placeholder={t("animeSlug")} required className={inputClass} />
+          <input name="titleTh" placeholder={t("officialTitleField")} required className={inputClass} />
+          <input name="sourceUrl" type="url" placeholder={t("officialSourceField")} required className={inputClass} />
+          <button type="submit" className={primaryClass}>{t("saveTitle")}</button>
         </form>
+      </Section>
+
+      <Section id="studios-link" title={t("channels")}>
+        <ul className="space-y-2 text-sm">
+          <li>
+            <Link href="/admin/studios" className="text-ink underline underline-offset-4">
+              {t("studiosManage")}
+            </Link>
+          </li>
+          <li>
+            <Link href="/admin/seo" className="text-ink underline underline-offset-4">
+              {t("seoManage")}
+            </Link>
+          </li>
+        </ul>
       </Section>
 
       <Section id="trailers" title={t("trailers")}>

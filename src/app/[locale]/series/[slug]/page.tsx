@@ -9,8 +9,10 @@ import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { cornerBadgeFor, getSeriesEntries, type FeedEntry } from "@/data/feed";
 import { routing } from "@/i18n/routing";
+import { localeAlternates } from "@/lib/alternates";
 import { preparePage } from "@/lib/page";
 import { resolveTitle } from "@/lib/titles";
+import { JsonLd } from "@/components/seo/JsonLd";
 
 // Renders per request (see preparePage), so instant-navigation validation is opted out.
 export const instant = false;
@@ -27,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: data.series.titleRomaji,
-    alternates: { canonical: `/${locale}/series/${slug}` },
+    alternates: localeAlternates(locale, `/series/${slug}`),
   };
 }
 
@@ -42,8 +44,18 @@ export default async function SeriesPage({ params }: Props) {
   const t = await getTranslations("series");
   const kindLabel = await getTranslations("series.kind");
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TVSeries",
+    name: data.series.titleRomaji,
+    url: `/${locale}/series/${slug}`,
+    numberOfEpisodes: data.entries.reduce((sum, entry) => sum + (entry.episodeCount ?? 0), 0) || undefined,
+    inLanguage: locale,
+  };
+
   return (
     <div className="space-y-8">
+      <JsonLd data={jsonLd} />
       <header className="space-y-2">
         <h1 className="text-3xl font-bold text-ink">{t("title", { title: data.series.titleRomaji })}</h1>
         <p className="text-sm text-muted">{t("seasons")}</p>

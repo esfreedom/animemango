@@ -130,10 +130,12 @@ async function syncTitle(
     { locale: "en", title: mapped.titleEnglish ?? mapped.titleRomaji },
     ...(mapped.titleNative ? [{ locale: "ja", title: mapped.titleNative }] : []),
   ];
+  // The AniList page is the URL for these names, so the official-source rule still holds.
+  const anilistUrl = `https://anilist.co/anime/${mapped.anilistId}`;
   for (const item of titles) {
     await tx
       .insert(animeI18n)
-      .values({ animeId: row.id, locale: item.locale, title: item.title, source: "official" })
+      .values({ animeId: row.id, locale: item.locale, title: item.title, source: "official", sourceUrl: anilistUrl })
       .onConflictDoNothing();
   }
 

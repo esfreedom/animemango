@@ -2,20 +2,27 @@ import { getTranslations } from "next-intl/server";
 import { PosterCard } from "@/components/anime/PosterCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getAiringBetween, type AiringItem } from "@/data/catalog";
+import { localeAlternates } from "@/lib/alternates";
 import { preparePage } from "@/lib/page";
 import { resolveTitle } from "@/lib/titles";
-import { DISPLAY_TIME_ZONES, formatAirTime, parseTimeZone } from "@/lib/time";
+import { DISPLAY_TIME_ZONES, formatAirTime, parseTimeZone, TIME_ZONE_LABEL_KEY } from "@/lib/time";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 // Renders per request (see preparePage), so instant-navigation validation is opted out.
 export const instant = false;
 
+export async function generateMetadata({ params }: PageProps<"/[locale]/schedule">) {
+  const { locale } = await params;
+  return { alternates: localeAlternates(locale, "/schedule") };
+}
+
 export default async function SchedulePage({ params, searchParams }: PageProps<"/[locale]/schedule">) {
   const locale = await preparePage(params);
   const { tz } = await searchParams;
   const zone = parseTimeZone(typeof tz === "string" ? tz : undefined);
   const t = await getTranslations("schedule");
+  const tTimeZone = await getTranslations("timezones");
 
   const now = new Date();
   const items = await getAiringBetween(now, new Date(now.getTime() + WEEK_MS), 300);
@@ -40,7 +47,7 @@ export default async function SchedulePage({ params, searchParams }: PageProps<"
           <select name="tz" defaultValue={zone} className="h-9 rounded-md border border-line bg-surface px-2 text-sm text-ink">
             {DISPLAY_TIME_ZONES.map((option) => (
               <option key={option} value={option}>
-                {option}
+                {tTimeZone(TIME_ZONE_LABEL_KEY[option])}
               </option>
             ))}
           </select>

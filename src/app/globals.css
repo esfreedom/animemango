@@ -1,34 +1,37 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. Dark is the default theme; `data-theme="light"` on <html>
- * switches to the light palette. Components use the Tailwind names mapped below
- * (bg-canvas, text-ink, border-line, ...), never raw hex values.
+ * Design tokens. Each token is written once with light-dark(), and the active
+ * palette comes from `color-scheme`. The value of data-theme on <html> picks that scheme:
+ *   "dark"   -> dark palette (default, DESIGN.md section 11)
+ *   "light"  -> light palette
+ *   "system" -> follows the operating system
+ * Components use the Tailwind names mapped below (bg-canvas, text-ink, border-line, ...),
+ * never raw hex values.
  */
 :root {
   color-scheme: dark;
-  --c-canvas: #0b0d12;
-  --c-surface: #141823;
-  --c-raised: #1c2130;
-  --c-line: #2a3142;
-  --c-ink: #f2f4f8;
-  --c-muted: #9aa3b5;
-  --c-accent: #ff6b8b;
-  --c-on-accent: #140a0e;
-  --c-focus: #7dd3fc;
+  --c-canvas: light-dark(#f6f7fb, #0b0d12);
+  --c-surface: light-dark(#ffffff, #141823);
+  --c-raised: light-dark(#eef0f6, #1c2130);
+  --c-line: light-dark(#d9deea, #2a3142);
+  --c-ink: light-dark(#141823, #f2f4f8);
+  --c-muted: light-dark(#5b6478, #9aa3b5);
+  --c-accent: light-dark(#d6336c, #ff6b8b);
+  --c-on-accent: light-dark(#ffffff, #140a0e);
+  --c-focus: light-dark(#0369a1, #7dd3fc);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --c-canvas: #f6f7fb;
-  --c-surface: #ffffff;
-  --c-raised: #eef0f6;
-  --c-line: #d9deea;
-  --c-ink: #141823;
-  --c-muted: #5b6478;
-  --c-accent: #d6336c;
-  --c-on-accent: #ffffff;
-  --c-focus: #0369a1;
+}
+
+:root[data-theme="system"] {
+  color-scheme: light dark;
 }
 
 @theme inline {

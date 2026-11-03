@@ -1,21 +1,41 @@
 import type { User as AuthUser } from "@supabase/supabase-js";
 import { eq } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { getDb, type Db } from "@/db/client";
 import { users } from "@/db/schema";
+import { isPasswordLoginEnabled } from "./admin-password";
+import { SESSION_COOKIE, verifySession } from "./admin-session";
 import { createSupabaseServerClient, isAuthConfigured } from "./supabase/server";
 
 export type CurrentUser = typeof users.$inferSelect;
 
-// Returns the signed-in user's row. Returns null when auth is not configured or nobody
-// is signed in. The row is created on first sign-in and refreshed from the Google profile.
+// Returns the signed-in user's row. Returns null when nobody is signed in. A Google account is
+// checked first. Otherwise the back-office login cookie is checked (see actions/admin-auth.ts).
+// The Google row is created on first sign-in and refreshed from the Google profile.
 export async function getCurrentUser(): Promise<CurrentUser | null> {
-  if (!isAuthConfigured()) return null;
+  if (isAuthConfigured()) {
+    const supabase = await createSupabaseServerClient();
+    const { data } = await supabase.auth.getUser();
+    if (data.user) return syncUserRecord(getDb(), data.user);
+  }
 
-  const supabase = await createSupabaseServerClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data.user) return null;
+  return getAdminCredentialUser();
+}
 
-  return syncUserRecord(getDb(), data.user);
+// The admin row for a valid back-office session. Password login is off in production, so no
+// session can be created there, and this check stays off as well.
+async function getAdminCredentialUser(): Promise<CurrentUser | null> {
+  if (!isPasswordLoginEnabled()) return null;
+
+  // The session expires by time, so this request must not be prerendered with a fixed clock.
+  await connection();
+  const cookieStore = await cookies();
+  const session = verifySession(cookieStore.get(SESSION_COOKIE)?.value, process.env.ADMIN_SESSION_SECRET, Date.now());
+  if (!session) return null;
+
+  const [row] = await getDb().select().from(users).where(eq(users.username, session.username)).limit(1);
+  return row?.role === "admin" ? row : null;
 }
 
 // Creates the users row for a Google account, or updates the display name and avatar

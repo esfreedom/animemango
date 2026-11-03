@@ -5,6 +5,8 @@ import { z } from "zod";
 export const draftFieldsSchema = z
   .object({
     titleTh: z.string().trim().min(1).max(200).nullable(),
+    // Where the Thai title was read. Required when titleTh is set (checked in proposals.ts).
+    titleSourceUrl: z.url().max(2000).nullable().optional(),
     synopsisTh: z.string().trim().min(1).max(600).nullable(),
     genresTh: z.array(z.string().trim().min(1).max(40)).max(12),
     unknownFields: z.array(z.string().max(60)).max(10),

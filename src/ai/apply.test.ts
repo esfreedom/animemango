@@ -109,14 +109,20 @@ describe("applyProposal", () => {
     ]);
   });
 
-  it("marks reviewer-edited metadata as human and keeps the original text otherwise", async () => {
+  it("writes a Thai title only with its official source and keeps that source after a reviewer edit", async () => {
     const [target] = await db.select().from(anime).where(eq(anime.slug, "season-one"));
     const [row] = await db
       .insert(proposal)
       .values({
         kind: "metadata",
         animeId: target.id,
-        payload: { titleTh: "ชื่อร่าง", synopsisTh: "เรื่องย่อร่าง", genresTh: [], unknownFields: [] },
+        payload: {
+          titleTh: "ชื่อร่าง",
+          titleSourceUrl: "https://www.netflix.com/th/title/1",
+          synopsisTh: "เรื่องย่อร่าง",
+          genresTh: [],
+          unknownFields: [],
+        },
         sources: [],
         aiModel: "test",
         promptVersion: "v1",
@@ -127,7 +133,44 @@ describe("applyProposal", () => {
 
     const [thai] = await db.select().from(animeI18n).where(eq(animeI18n.locale, "th"));
     expect(thai.title).toBe("ชื่อที่แก้แล้ว");
-    expect(thai.source).toBe("human");
+    expect(thai.source).toBe("official");
+    expect(thai.sourceUrl).toBe("https://www.netflix.com/th/title/1");
     expect(thai.synopsis).toBe("เรื่องย่อร่าง");
+  });
+
+  it("does not publish a Thai title that has no official source", async () => {
+    const [target] = await db.select().from(anime).where(eq(anime.slug, "season-one"));
+    const [row] = await db
+      .insert(proposal)
+      .values({
+        kind: "metadata",
+        animeId: target.id,
+        payload: { titleTh: "ชื่อร่าง", titleSourceUrl: null, synopsisTh: null, genresTh: [], unknownFields: [] },
+        sources: [],
+        aiModel: "test",
+        promptVersion: "v1",
+      })
+      .returning();
+
+    await expect(applyProposal(asAppDb(db), row, ADMIN_ID)).rejects.toThrow("title_needs_official_source");
+    expect(await db.select().from(animeI18n)).toHaveLength(0);
+  });
+
+  it("writes nothing for Thai when the proposal has no Thai title", async () => {
+    const [target] = await db.select().from(anime).where(eq(anime.slug, "season-one"));
+    const [row] = await db
+      .insert(proposal)
+      .values({
+        kind: "metadata",
+        animeId: target.id,
+        payload: { titleTh: null, synopsisTh: "เรื่องย่อ", genresTh: [], unknownFields: [] },
+        sources: [],
+        aiModel: "test",
+        promptVersion: "v1",
+      })
+      .returning();
+
+    await applyProposal(asAppDb(db), row, ADMIN_ID);
+    expect(await db.select().from(animeI18n).where(eq(animeI18n.locale, "th"))).toHaveLength(0);
   });
 });

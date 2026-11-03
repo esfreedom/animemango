@@ -45,21 +45,32 @@ export async function applyProposal(
 
 async function applyMetadata(db: Db, row: ProposalRow, reviewerId: string, edits: MetadataEdits) {
   if (!row.animeId) throw new Error("proposal_has_no_title");
-  const original = row.payload as { titleTh?: string | null; synopsisTh?: string | null };
+  const original = row.payload as { titleTh?: string | null; titleSourceUrl?: string | null; synopsisTh?: string | null };
   const titleTh = edits.titleTh ?? original.titleTh ?? null;
   const synopsisTh = edits.synopsisTh ?? original.synopsisTh ?? null;
-  if (!titleTh) throw new Error("title_required");
+  if (!titleTh) {
+    // Without a Thai title there is no Thai row to attach a synopsis to, so nothing is written.
+    return;
+  }
 
-  // Text the reviewer changed is marked "human". Text published as drafted stays "machine".
-  const edited = titleTh !== (original.titleTh ?? null) || synopsisTh !== (original.synopsisTh ?? null);
-  const source = edited ? "human" : "machine";
+  // A Thai name is official only with the source URL it was read from. Reviewer edits keep that URL.
+  const sourceUrl = original.titleSourceUrl ?? null;
+  if (!sourceUrl) throw new Error("title_needs_official_source");
 
   await db
     .insert(animeI18n)
-    .values({ animeId: row.animeId, locale: "th", title: titleTh, synopsis: synopsisTh, source, reviewedBy: reviewerId })
+    .values({
+      animeId: row.animeId,
+      locale: "th",
+      title: titleTh,
+      synopsis: synopsisTh,
+      source: "official",
+      sourceUrl,
+      reviewedBy: reviewerId,
+    })
     .onConflictDoUpdate({
       target: [animeI18n.animeId, animeI18n.locale],
-      set: { title: titleTh, synopsis: synopsisTh, source, reviewedBy: reviewerId },
+      set: { title: titleTh, synopsis: synopsisTh, source: "official", sourceUrl, reviewedBy: reviewerId },
     });
 }
 

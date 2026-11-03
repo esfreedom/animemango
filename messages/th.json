@@ -26,7 +26,10 @@
     "pageNotFound": "ไม่พบหน้าที่คุณต้องการ"
   },
   "theme": {
-    "toggle": "สลับธีมสว่างหรือมืด"
+    "label": "ธีม",
+    "dark": "มืด",
+    "light": "สว่าง",
+    "system": "ตามระบบ"
   },
   "locale": {
     "label": "ภาษา",
@@ -64,7 +67,10 @@
       "hotThreads": "กระทู้ร้อนแรง"
     },
     "empty": "ยังไม่มีข้อมูลในหมวดนี้",
-    "threadComments": "{count} ความเห็น"
+    "threadComments": "{count} ความเห็น",
+    "newBadge": "ใหม่",
+    "recent": "ตอนล่าสุด",
+    "nextEpisode": "ตอนถัดไป"
   },
   "status": {
     "upcoming": "กำลังจะฉาย",
@@ -108,7 +114,8 @@
     "followers": "{count} คนติดตาม",
     "shop": "สินค้าอย่างเป็นทางการ",
     "shopDisclosure": "ลิงก์พันธมิตร: เราอาจได้รับค่าตอบแทนเมื่อคุณซื้อผ่านลิงก์นี้",
-    "season": "ฤดูกาล"
+    "season": "ฤดูกาล",
+    "titleSource": "ชื่อภาษาไทยจาก"
   },
   "episode": {
     "title": "ตอนที่ {number}",
@@ -287,7 +294,15 @@
     "officialUrl": "เว็บทางการ",
     "addPlatform": "เพิ่มแพลตฟอร์ม",
     "done": "บันทึกแล้ว",
-    "failed": "บันทึกไม่สำเร็จ ตรวจสอบข้อมูลที่กรอก"
+    "failed": "บันทึกไม่สำเร็จ ตรวจสอบข้อมูลที่กรอก",
+    "officialTitle": "ชื่อไทยทางการ",
+    "officialTitleHelp": "ใส่ชื่อภาษาไทยที่ปรากฏในแหล่งทางการเท่านั้น เช่น เว็บแพลตฟอร์มหรือผู้จัดจำหน่ายในไทย ระบบไม่รับลิงก์จาก AniList",
+    "officialTitleField": "ชื่อภาษาไทย",
+    "officialSourceField": "ลิงก์หน้าทางการที่มีชื่อนี้",
+    "saveTitle": "บันทึกชื่อไทย",
+    "titleSource": "ชื่อภาษาไทยจาก",
+    "studiosManage": "จัดการค่ายและช่องทางการ",
+    "seoManage": "ดูรายงาน SEO bot"
   },
   "errors": {
     "generic": "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง"
@@ -310,5 +325,130 @@
     "none": "ไม่เลือก",
     "noSub": "ไม่มีซับ",
     "remembered": "ระบบจำค่านี้ไว้ให้ครั้งหน้า"
+  },
+  "genre": {
+    "action": "แอ็กชัน",
+    "adventure": "ผจญภัย",
+    "comedy": "ตลก",
+    "drama": "ดราม่า",
+    "ecchi": "เอจจิ",
+    "fantasy": "แฟนตาซี",
+    "hentai": "เฮนไท",
+    "horror": "สยองขวัญ",
+    "mahou_shoujo": "สาวน้อยเวทมนตร์",
+    "mecha": "หุ่นยนต์",
+    "music": "ดนตรี",
+    "mystery": "ลึกลับ",
+    "psychological": "จิตวิทยา",
+    "romance": "โรแมนซ์",
+    "sci_fi": "ไซไฟ",
+    "slice_of_life": "ชีวิตประจำวัน",
+    "sports": "กีฬา",
+    "supernatural": "เหนือธรรมชาติ",
+    "thriller": "ระทึกขวัญ"
+  },
+  "format": {
+    "TV": "ทีวี",
+    "TV_SHORT": "ทีวีสั้น",
+    "MOVIE": "ภาพยนตร์",
+    "SPECIAL": "ตอนพิเศษ",
+    "OVA": "OVA",
+    "ONA": "ONA",
+    "MUSIC": "มิวสิก"
+  },
+  "timezones": {
+    "bangkok": "เวลาไทย (Asia/Bangkok)",
+    "tokyo": "เวลาญี่ปุ่น (Asia/Tokyo)",
+    "utc": "UTC",
+    "london": "ลอนดอน (Europe/London)",
+    "new_york": "นิวยอร์ก (America/New_York)"
+  },
+  "ads": {
+    "label": "โฆษณา"
+  },
+  "studio": {
+    "title": "ค่ายและผู้เผยแพร่",
+    "works": "ผลงาน",
+    "noWorks": "ยังไม่มีผลงานที่เชื่อมไว้",
+    "channels": "ช่องทางการ",
+    "noChannels": "ยังไม่มีช่องทางการที่อนุมัติ",
+    "approved": "อนุมัติแล้ว",
+    "pending": "รอตรวจ",
+    "revoked": "ยกเลิกแล้ว",
+    "officialSite": "เว็บทางการ",
+    "trailerAllowed": "อนุญาตให้ฝังตัวอย่าง",
+    "kind": {
+      "studio": "ค่ายอนิเมะ",
+      "distributor": "ผู้จัดจำหน่าย",
+      "platform": "แพลตฟอร์ม",
+      "rights_holder": "เจ้าของลิขสิทธิ์"
+    },
+    "adminTitle": "จัดการค่ายและช่องทางการ",
+    "createTitle": "สร้างโปรไฟล์ค่าย",
+    "name": "ชื่อ (romaji)",
+    "slug": "slug (ภาษาอังกฤษตัวเล็ก)",
+    "kindField": "ชนิด",
+    "website": "เว็บทางการ (https)",
+    "create": "สร้างโปรไฟล์",
+    "channelTitle": "เพิ่มช่องทางการ",
+    "studioSlug": "slug ของค่าย",
+    "platformField": "แพลตฟอร์ม",
+    "channelIdField": "รหัสช่อง",
+    "channelUrl": "ลิงก์ช่อง (https)",
+    "evidence": "ลิงก์หลักฐานว่าเป็นช่องทางการ",
+    "addChannel": "เพิ่มช่อง (รอตรวจ)",
+    "approve": "อนุมัติให้ฝังตัวอย่าง",
+    "revoke": "เพิกถอน",
+    "linkTitle": "เชื่อมเรื่องกับค่าย",
+    "animeSlug": "slug ของเรื่อง",
+    "roleField": "บทบาท",
+    "roles": {
+      "produce": "ผลิต",
+      "distribute": "จัดจำหน่าย",
+      "licensor": "ผู้อนุญาต"
+    },
+    "link": "เชื่อม",
+    "unlink": "ยกเลิกการเชื่อม",
+    "backToAdmin": "กลับหน้าหลังบ้าน"
+  },
+  "adminLogin": {
+    "title": "เข้าสู่ระบบหลังบ้าน",
+    "description": "สำหรับทีมงานเท่านั้น ใช้ได้เฉพาะตอนพัฒนาเครื่อง",
+    "username": "ชื่อผู้ใช้",
+    "password": "รหัสผ่าน",
+    "submit": "เข้าสู่ระบบ",
+    "errors": {
+      "invalid": "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
+      "too_many": "ลองผิดหลายครั้ง กรุณารอ 15 นาทีแล้วลองใหม่",
+      "disabled": "การเข้าสู่ระบบด้วยรหัสผ่านปิดอยู่ในสภาพแวดล้อมนี้",
+      "not_configured": "ยังไม่ได้ตั้งค่า ADMIN_SESSION_SECRET"
+    }
+  },
+  "consent": {
+    "title": "การใช้คุกกี้",
+    "body": "เราใช้คุกกี้วิเคราะห์การเข้าชม (Google Analytics) เฉพาะเมื่อคุณยอมรับ ถ้าไม่ยอมรับ ระบบจะไม่โหลดเครื่องมือนี้",
+    "privacyLink": "อ่านนโยบายความเป็นส่วนตัว",
+    "accept": "ยอมรับ",
+    "decline": "ไม่ยอมรับ"
+  },
+  "seoAudit": {
+    "title": "SEO bot",
+    "description": "บอทสุ่มตรวจหน้าสาธารณะจาก sitemap ทุกชั่วโมง แสดงเฉพาะผลล่าสุดของแต่ละ URL",
+    "summary": "สรุปผล",
+    "none": "ยังไม่เคยมีการตรวจ",
+    "lastRun": "ตรวจล่าสุด {time}",
+    "checked": "ตรวจแล้ว {count} หน้า",
+    "flagged": "หน้าที่มีปัญหา",
+    "noneFlagged": "ไม่พบปัญหาในผลล่าสุด",
+    "backToAdmin": "กลับหน้าหลังบ้าน",
+    "issues": {
+      "status_not_200": "สถานะไม่ใช่ 200",
+      "missing_title": "ไม่มี title",
+      "missing_description": "ไม่มี description",
+      "canonical_mismatch": "canonical ไม่ตรง",
+      "missing_hreflang": "hreflang ไม่ครบ",
+      "missing_jsonld": "ไม่มีข้อมูลโครงสร้าง",
+      "noindex_mismatch": "noindex ไม่ตรงกับกฎ"
+    }
   }
 }

@@ -1,6 +1,8 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { SESSION_COOKIE } from "@/lib/admin-session";
 import { createSupabaseServerClient, isAuthConfigured } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/site";
 import { parseLocale } from "./shared";
@@ -25,11 +27,14 @@ export async function signInWithGoogle(formData: FormData) {
   redirect(data.url);
 }
 
+// Ends the Google session and the back-office session, if either exists.
 export async function signOut(formData: FormData) {
   const locale = parseLocale(formData.get("locale"));
   if (isAuthConfigured()) {
     const supabase = await createSupabaseServerClient();
     await supabase.auth.signOut();
   }
+  const cookieStore = await cookies();
+  cookieStore.delete(SESSION_COOKIE);
   redirect(`/${locale}`);
 }

@@ -3,11 +3,18 @@ import { PosterCard } from "@/components/anime/PosterCard";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getGenres, getPlatforms, searchAnime } from "@/data/catalog";
+import { localeAlternates } from "@/lib/alternates";
 import { preparePage } from "@/lib/page";
 import { resolveTitle } from "@/lib/titles";
+import { translateValue } from "@/lib/labels";
 
 // Renders per request (see preparePage), so instant-navigation validation is opted out.
 export const instant = false;
+
+export async function generateMetadata({ params }: PageProps<"/[locale]/search">) {
+  const { locale } = await params;
+  return { alternates: localeAlternates(locale, "/search") };
+}
 
 export default async function SearchPage({ params, searchParams }: PageProps<"/[locale]/search">) {
   const locale = await preparePage(params);
@@ -27,6 +34,7 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
 
   const t = await getTranslations("search");
   const tStatus = await getTranslations("status");
+  const tGenre = await getTranslations("genre");
   const [genres, platforms, results] = await Promise.all([
     getGenres(),
     getPlatforms(),
@@ -52,7 +60,7 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
             <option value="">{t("allGenres")}</option>
             {genres.map((genre) => (
               <option key={genre} value={genre}>
-                {genre}
+                {translateValue(tGenre, genre)}
               </option>
             ))}
           </select>
@@ -97,7 +105,7 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
                   href={`/anime/${item.slug}`}
                   title={title.title}
                   coverUrl={item.coverUrl}
-                  meta={item.genres.slice(0, 2).join(" · ") || undefined}
+                  meta={item.genres.slice(0, 2).map((genre) => translateValue(tGenre, genre)).join(" · ") || undefined}
                   tags={<Badge>{tStatus(item.status as "upcoming" | "airing" | "finished" | "hiatus")}</Badge>}
                 />
               </li>

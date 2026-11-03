@@ -26,7 +26,10 @@
     "pageNotFound": "お探しのページが見つかりません"
   },
   "theme": {
-    "toggle": "明るいテーマと暗いテーマを切り替え"
+    "label": "テーマ",
+    "dark": "ダーク",
+    "light": "ライト",
+    "system": "システム"
   },
   "locale": {
     "label": "言語",
@@ -64,7 +67,10 @@
       "hotThreads": "人気のスレッド"
     },
     "empty": "この項目にはまだ情報がありません",
-    "threadComments": "コメント {count} 件"
+    "threadComments": "コメント {count} 件",
+    "newBadge": "NEW",
+    "recent": "最新話",
+    "nextEpisode": "次回"
   },
   "status": {
     "upcoming": "放送予定",
@@ -108,7 +114,8 @@
     "followers": "フォロワー {count} 人",
     "shop": "公式グッズ",
     "shopDisclosure": "提携リンクです。これらのリンクから購入すると、紹介料が発生する場合があります。",
-    "season": "シーズン"
+    "season": "シーズン",
+    "titleSource": "タイ語タイトルの出典:"
   },
   "episode": {
     "title": "第{number}話",
@@ -287,7 +294,15 @@
     "officialUrl": "公式サイト",
     "addPlatform": "配信先を追加",
     "done": "保存しました",
-    "failed": "保存できませんでした。入力内容を確認してください"
+    "failed": "保存できませんでした。入力内容を確認してください",
+    "officialTitle": "タイ語の公式タイトル",
+    "officialTitleHelp": "タイの配信サイトや配給元など、公式の情報源に表示されているタイ語タイトルだけを入力してください。AniListのリンクは受け付けません。",
+    "officialTitleField": "タイ語タイトル",
+    "officialSourceField": "このタイトルが載っている公式ページのリンク",
+    "saveTitle": "タイ語タイトルを保存",
+    "titleSource": "タイ語タイトルの出典:",
+    "studiosManage": "スタジオとチャンネルの管理",
+    "seoManage": "SEOボットの結果を見る"
   },
   "errors": {
     "generic": "エラーが発生しました。もう一度お試しください"
@@ -310,5 +325,130 @@
     "none": "指定なし",
     "noSub": "字幕なし",
     "remembered": "次回も記憶されます"
+  },
+  "genre": {
+    "action": "アクション",
+    "adventure": "冒険",
+    "comedy": "コメディ",
+    "drama": "ドラマ",
+    "ecchi": "お色気",
+    "fantasy": "ファンタジー",
+    "hentai": "成人向け",
+    "horror": "ホラー",
+    "mahou_shoujo": "魔法少女",
+    "mecha": "メカ",
+    "music": "音楽",
+    "mystery": "ミステリー",
+    "psychological": "心理",
+    "romance": "ロマンス",
+    "sci_fi": "SF",
+    "slice_of_life": "日常",
+    "sports": "スポーツ",
+    "supernatural": "超自然",
+    "thriller": "スリラー"
+  },
+  "format": {
+    "TV": "TV",
+    "TV_SHORT": "TVショート",
+    "MOVIE": "映画",
+    "SPECIAL": "スペシャル",
+    "OVA": "OVA",
+    "ONA": "ONA",
+    "MUSIC": "音楽"
+  },
+  "timezones": {
+    "bangkok": "タイ時間 (Asia/Bangkok)",
+    "tokyo": "日本時間 (Asia/Tokyo)",
+    "utc": "UTC",
+    "london": "ロンドン (Europe/London)",
+    "new_york": "ニューヨーク (America/New_York)"
+  },
+  "ads": {
+    "label": "広告"
+  },
+  "studio": {
+    "title": "スタジオ・配給元",
+    "works": "作品",
+    "noWorks": "まだ紐づいた作品はありません",
+    "channels": "公式チャンネル",
+    "noChannels": "承認済みのチャンネルはまだありません",
+    "approved": "承認済み",
+    "pending": "確認待ち",
+    "revoked": "取り消し済み",
+    "officialSite": "公式サイト",
+    "trailerAllowed": "PVの埋め込みを許可",
+    "kind": {
+      "studio": "アニメスタジオ",
+      "distributor": "配給元",
+      "platform": "配信プラットフォーム",
+      "rights_holder": "権利者"
+    },
+    "adminTitle": "スタジオとチャンネルの管理",
+    "createTitle": "スタジオのプロフィールを作成",
+    "name": "名前（ローマ字）",
+    "slug": "slug（英小文字）",
+    "kindField": "種類",
+    "website": "公式サイト（https）",
+    "create": "プロフィールを作成",
+    "channelTitle": "公式チャンネルを追加",
+    "studioSlug": "スタジオのslug",
+    "platformField": "プラットフォーム",
+    "channelIdField": "チャンネルID",
+    "channelUrl": "チャンネルのリンク（https）",
+    "evidence": "公式であることを示すリンク",
+    "addChannel": "チャンネルを追加（確認待ち）",
+    "approve": "PVの埋め込みを承認",
+    "revoke": "取り消す",
+    "linkTitle": "作品をスタジオに紐づける",
+    "animeSlug": "作品のslug",
+    "roleField": "役割",
+    "roles": {
+      "produce": "制作",
+      "distribute": "配給",
+      "licensor": "権利元"
+    },
+    "link": "紐づける",
+    "unlink": "紐づけを解除",
+    "backToAdmin": "管理画面へ戻る"
+  },
+  "adminLogin": {
+    "title": "管理画面ログイン",
+    "description": "チーム専用です。開発環境でのみ利用できます。",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "submit": "ログイン",
+    "errors": {
+      "invalid": "ユーザー名またはパスワードが正しくありません。",
+      "too_many": "失敗が続いたため、15分後にお試しください。",
+      "disabled": "この環境ではパスワードログインは無効です。",
+      "not_configured": "ADMIN_SESSION_SECRET が設定されていません。"
+    }
+  },
+  "consent": {
+    "title": "Cookieについて",
+    "body": "分析用Cookie（Google Analytics）は、同意いただいた場合のみ使用します。同意しない場合、このツールは読み込まれません。",
+    "privacyLink": "プライバシーポリシーを読む",
+    "accept": "同意する",
+    "decline": "同意しない"
+  },
+  "seoAudit": {
+    "title": "SEOボット",
+    "description": "ボットは毎時、サイトマップから公開ページをランダムに確認します。各URLの最新結果のみ表示します。",
+    "summary": "概要",
+    "none": "まだ確認は行われていません",
+    "lastRun": "最終確認 {time}",
+    "checked": "{count} ページを確認",
+    "flagged": "問題のあるページ",
+    "noneFlagged": "最新の確認では問題はありません",
+    "backToAdmin": "管理画面へ戻る",
+    "issues": {
+      "status_not_200": "ステータスが200ではない",
+      "missing_title": "titleがない",
+      "missing_description": "descriptionがない",
+      "canonical_mismatch": "canonicalが一致しない",
+      "missing_hreflang": "hreflangが不足",
+      "missing_jsonld": "構造化データがない",
+      "noindex_mismatch": "noindexが規則と一致しない"
+    }
   }
 }

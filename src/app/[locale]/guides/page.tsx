@@ -1,10 +1,16 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { GUIDES } from "@/content/guides";
+import { localeAlternates } from "@/lib/alternates";
 import { preparePage } from "@/lib/page";
 
 // Renders per request (see preparePage), so instant-navigation validation is opted out.
 export const instant = false;
+
+export async function generateMetadata({ params }: PageProps<"/[locale]/guides">) {
+  const { locale } = await params;
+  return { alternates: localeAlternates(locale, "/guides") };
+}
 
 export default async function GuidesIndexPage({ params }: PageProps<"/[locale]/guides">) {
   const locale = await preparePage(params);

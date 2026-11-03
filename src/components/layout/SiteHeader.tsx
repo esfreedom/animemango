@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { AccountLinks } from "./AccountLinks";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { navItems } from "./nav";
-import { ThemeToggle } from "./ThemeToggle";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
 export async function SiteHeader({ locale }: { locale: string }) {
   const t = await getTranslations("nav");
@@ -33,7 +33,7 @@ export async function SiteHeader({ locale }: { locale: string }) {
 
         <div className="ml-auto flex items-center gap-2">
           <LocaleSwitcher />
-          <ThemeToggle />
+          <ThemeSwitcher />
           <Suspense fallback={null}>
             <AccountLinks locale={locale} />
           </Suspense>

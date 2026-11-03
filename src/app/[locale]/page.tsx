@@ -1,13 +1,15 @@
 import { getTranslations } from "next-intl/server";
-import { EntryCard } from "@/components/anime/EntryCard";
+import { SeriesCard } from "@/components/anime/SeriesCard";
 import { LangTags } from "@/components/anime/LangTags";
+import { LiveRefresh } from "@/components/layout/LiveRefresh";
 import { Section } from "@/components/ui/Section";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Link } from "@/i18n/navigation";
 import { getAnnouncements, getAvailabilityChanges, getHotThreads } from "@/data/catalog";
-import { getHomeFeed } from "@/data/feed";
+import { getSeriesHomeFeed } from "@/data/feed";
 import { resolveTitle } from "@/lib/titles";
 import { formatAirTime } from "@/lib/time";
+import { localeAlternates } from "@/lib/alternates";
 import { preparePage } from "@/lib/page";
 import { readPrefs } from "@/lib/prefs-server";
 import { getCurrentUser } from "@/lib/session";
@@ -18,22 +20,31 @@ export const instant = false;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+export async function generateMetadata({ params }: PageProps<"/[locale]">) {
+  const { locale } = await params;
+  return { alternates: localeAlternates(locale, "") };
+}
+
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const locale = await preparePage(params);
   const t = await getTranslations("home");
   const now = new Date();
 
   const user = await getCurrentUser();
-  const [feed, announcements, changes, hot, prefs] = await Promise.all([
-    getHomeFeed(now),
+  const [cards, announcements, changes, hot, prefs] = await Promise.all([
+    getSeriesHomeFeed(now),
     getAnnouncements(),
     getAvailabilityChanges(),
     getHotThreads(new Date(now.getTime() - DAY_MS)),
     readPrefs(user),
   ]);
+  // One card per series. Series that aired recently are listed first, then the ones still upcoming.
+  const updated = cards.filter((card) => card.lastAiredAt !== null);
+  const upcoming = cards.filter((card) => card.lastAiredAt === null);
 
   return (
     <div className="flex flex-col gap-12">
+      <LiveRefresh />
       <section className="space-y-3">
         <h1 className="text-3xl font-bold text-ink md:text-4xl">{t("title")}</h1>
         <p className="max-w-2xl text-muted">{t("subtitle")}</p>
@@ -41,13 +52,13 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       </section>
 
       <Section id="latest-updates" title={t("sections.airingToday")}>
-        {feed.updated.length === 0 ? (
+        {updated.length === 0 ? (
           <EmptyState message={t("empty")} />
         ) : (
-          <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 md:gap-4">
-            {feed.updated.map((entry, index) => (
-              <li key={entry.animeId}>
-                <EntryCard entry={entry} locale={locale} now={now} mode="updated" prefs={prefs} priority={index < 6} />
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6 md:gap-5">
+            {updated.map((card, index) => (
+              <li key={card.key}>
+                <SeriesCard card={card} locale={locale} now={now} prefs={prefs} priority={index < 6} />
               </li>
             ))}
           </ul>
@@ -55,13 +66,13 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       </Section>
 
       <Section id="upcoming" title={t("sections.upcoming")}>
-        {feed.upcoming.length === 0 ? (
+        {upcoming.length === 0 ? (
           <EmptyState message={t("empty")} />
         ) : (
-          <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 md:gap-4">
-            {feed.upcoming.map((entry) => (
-              <li key={entry.animeId}>
-                <EntryCard entry={entry} locale={locale} now={now} mode="upcoming" prefs={prefs} />
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6 md:gap-5">
+            {upcoming.map((card) => (
+              <li key={card.key}>
+                <SeriesCard card={card} locale={locale} now={now} prefs={prefs} />
               </li>
             ))}
           </ul>

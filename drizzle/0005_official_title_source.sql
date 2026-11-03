@@ -1,0 +1,3 @@
+ALTER TABLE "anime_i18n" ADD COLUMN "source_url" text;--> statement-breakpoint
+UPDATE "anime_i18n" SET "source_url" = 'https://anilist.co/anime/' || "anime"."anilist_id"::text FROM "anime" WHERE "anime"."id" = "anime_i18n"."anime_id" AND "anime_i18n"."source" = 'official' AND "anime_i18n"."source_url" IS NULL;--> statement-breakpoint
+ALTER TABLE "anime_i18n" ADD CONSTRAINT "anime_i18n_official_source" CHECK ("anime_i18n"."source" <> 'official' or "anime_i18n"."source_url" is not null);

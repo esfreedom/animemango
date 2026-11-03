@@ -67,9 +67,9 @@ export type ProposalParse = { ok: true; value: ParsedProposal } | { ok: false; e
 export function parseProposalPayload(kind: ProposalKind, raw: unknown): ProposalParse {
   if (kind === "metadata") {
     const result = validateDraftFields(raw);
-    return result.ok
-      ? { ok: true, value: { payload: result.fields as Record<string, unknown>, sourceUrls: [] } }
-      : { ok: false, errors: result.errors };
+    if (!result.ok) return { ok: false, errors: result.errors };
+    const sourceUrls = result.fields.titleSourceUrl ? [result.fields.titleSourceUrl] : [];
+    return { ok: true, value: { payload: result.fields as Record<string, unknown>, sourceUrls } };
   }
 
   const schema = kind === "availability" ? availabilityPayload : kind === "announcement" ? announcementPayload : structurePayload;

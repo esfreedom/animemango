@@ -221,3 +221,15 @@ user             id, username, locale, timezone, role
 
 - เพิ่ม: `series`, `proposal` (แทน `ai_draft`)
 - เพิ่มคอลัมน์: `anime.series_id`, `entry_kind`, `season_label`, `sort_order`, `latest_aired_episode`; `platform_availability.covers_all_episodes`, `episode_from`, `episode_to`; `users.preferred_audio`, `preferred_sub`
+
+## 18. ค่าย/ช่องทางการ, หน้าแรกแบบซีรีส์, หลังบ้าน และการวัดผล (อนุมัติแล้ว)
+
+- **ค่าย/ผู้เผยแพร่** (`studio`): ชื่อ, ชนิด (studio, distributor, platform, rights_holder), เว็บทางการ ชื่อไทยใช้ได้เมื่อมาจากแหล่งทางการที่มี URL เท่านั้น
+- **ช่องทางการ** (`studio_channel`): แทน `official_channel` เดิม สถานะ pending, approved, revoked ช่องใหม่ต้องรอแอดมินอนุมัติ ลิงก์ช่องและลิงก์หลักฐานต้องอยู่บนโดเมนที่อนุญาต และไม่รับ AniList
+- **ตัวอย่างที่ฝังได้**: เฉพาะ trailer ที่เชื่อมกับช่องที่ approved และ allow_trailer เท่านั้น การเพิกถอนมีผลทันทีผ่าน `updateTag`
+- **ความสัมพันธ์ค่ายกับเรื่อง** (`anime_studio`): บทบาท produce, distribute, licensor เป็นข้อมูลที่แอดมินกรอก ไม่มี AI เป็นผู้ยืนยัน
+- **หน้าแรก**: หนึ่งการ์ดต่อซีรีส์ เรียงตามเวลาออกอากาศล่าสุดของตอนในหน้าต่าง 7 วัน (ไม่ใช้ `series.last_updated_at` ซึ่งยังไม่ได้ถูกใช้) ป้าย "ใหม่" แสดงภายใน 24 ชั่วโมงหลังตอนล่าสุด หน้าจอรีเฟรชทุก 5 นาทีเมื่อแท็บมองเห็นได้
+- **หลังบ้านรหัสผ่าน**: `admin` เฉพาะการพัฒนา รหัสเก็บเป็น scrypt เซสชันเป็น HMAC ใน cookie httpOnly จำกัดการลองผิด `getCurrentUser` เช็ค Google ก่อนแล้วจึงเช็คเซสชันนี้ `signOut` ล้างทั้งสองอย่าง
+- **การยินยอม**: cookie `consent` ค่าเริ่มต้นคือยังไม่ยินยอม GA4 โหลดเฉพาะเมื่อ `accepted` และมี `NEXT_PUBLIC_GA_ID` ที่รูปแบบถูกต้อง
+- **SEO bot**: สุ่มสูงสุด 100 หน้าจาก sitemap หน่วงเวลา 1 วินาทีต่อคำขอ ตรวจสถานะ title, description, canonical, hreflang, JSON-LD และ noindex ผลเก็บใน `seo_audit` และแสดงเฉพาะผลล่าสุดของแต่ละ URL
+- **เพิ่มเมื่อตรวจด้วย SEO bot**: หน้า schedule, search, season, guides และหน้าซีรีส์ ได้ alternates ครบทั้ง 3 ภาษา และหน้าซีรีส์มี JSON-LD

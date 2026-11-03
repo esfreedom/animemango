@@ -34,6 +34,8 @@ export const episodeStatusEnum = pgEnum("episode_status", [
   "aired",
   "delayed",
 ]);
+// official: a name taken from a source that can be checked, with its URL. Thai names must come
+// from an official Thai source. Names from AniList are stored with the AniList page as the URL.
 export const textSourceEnum = pgEnum("text_source", ["official", "human", "machine"]);
 export const langSourceEnum = pgEnum("lang_source", ["detected", "user"]);
 export const commentStatusEnum = pgEnum("comment_status", [
@@ -98,6 +100,8 @@ export const series = pgTable("series", {
   titleRomaji: text("title_romaji").notNull(),
   anilistRootId: integer("anilist_root_id").unique(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  // Moves when a new episode or a change in availability reaches the series. The home page sorts by it.
+  lastUpdatedAt: timestamp("last_updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const anime = pgTable(
@@ -140,9 +144,14 @@ export const animeI18n = pgTable(
     title: text("title").notNull(),
     synopsis: text("synopsis"),
     source: textSourceEnum("source").notNull(),
+    sourceUrl: text("source_url"),
     reviewedBy: uuid("reviewed_by").references(() => users.id),
   },
-  (t) => [primaryKey({ columns: [t.animeId, t.locale] })],
+  (t) => [
+    primaryKey({ columns: [t.animeId, t.locale] }),
+    // An official name must say where it came from.
+    check("anime_i18n_official_source", sql`${t.source} <> 'official' or ${t.sourceUrl} is not null`),
+  ],
 );
 
 export const seasonEntry = pgTable(
@@ -251,7 +260,9 @@ export const trailer = pgTable("trailer", {
     .references(() => anime.id, { onDelete: "cascade" }),
   youtubeId: text("youtube_id").notNull().unique(),
   channelId: text("channel_id").notNull(),
+  // Kept for compatibility. The embed decision uses studioChannelId (approved and allowTrailer).
   channelVerified: boolean("channel_verified").notNull().default(false),
+  studioChannelId: integer("studio_channel_id").references(() => studioChannel.id, { onDelete: "set null" }),
 });
 
 // Threads belong to a title or to an episode. They are never deleted when
@@ -353,6 +364,106 @@ export const officialChannel = pgTable("official_channel", {
   verifiedBy: uuid("verified_by").references(() => users.id),
   verifiedAt: timestamp("verified_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const studioKindEnum = pgEnum("studio_kind", ["studio", "distributor", "platform", "rights_holder"]);
+export const studioChannelPlatformEnum = pgEnum("studio_channel_platform", ["youtube", "facebook", "x", "website"]);
+export const studioChannelStatusEnum = pgEnum("studio_channel_status", ["pending", "approved", "revoked"]);
+export const animeStudioRoleEnum = pgEnum("anime_studio_role", ["produce", "distribute", "licensor"]);
+
+// A publisher profile: a studio, distributor, platform or rights holder (for example Muse).
+export const studio = pgTable("studio", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull().unique(),
+  nameRomaji: text("name_romaji").notNull(),
+  // Thai name only from an official source, with the URL it came from (same rule as titles).
+  nameTh: text("name_th"),
+  nameThSourceUrl: text("name_th_source_url"),
+  kind: studioKindEnum("kind").notNull().default("studio"),
+  websiteUrl: text("website_url"),
+  createdAt: createdAt(),
+});
+
+// A channel that belongs to a studio. Only an admin can approve it, and only an approved
+// channel with allowTrailer may have its videos embedded.
+export const studioChannel = pgTable(
+  "studio_channel",
+  {
+    id: serial("id").primaryKey(),
+    studioId: uuid("studio_id")
+      .notNull()
+      .references(() => studio.id, { onDelete: "cascade" }),
+    platform: studioChannelPlatformEnum("platform").notNull(),
+    channelId: text("channel_id").notNull(),
+    url: text("url").notNull(),
+    status: studioChannelStatusEnum("status").notNull().default("pending"),
+    allowTrailer: boolean("allow_trailer").notNull().default(false),
+    evidenceUrl: text("evidence_url").notNull(),
+    approvedBy: uuid("approved_by").references(() => users.id),
+    approvedAt: timestamp("approved_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  },
+  (t) => [uniqueIndex("studio_channel_platform_id_uq").on(t.platform, t.channelId)],
+);
+
+export const animeStudio = pgTable(
+  "anime_studio",
+  {
+    animeId: uuid("anime_id")
+      .notNull()
+      .references(() => anime.id, { onDelete: "cascade" }),
+    studioId: uuid("studio_id")
+      .notNull()
+      .references(() => studio.id, { onDelete: "cascade" }),
+    role: animeStudioRoleEnum("role").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.animeId, t.studioId, t.role] })],
+);
+
+// Local admin accounts for the back office (development only, see approved plan section 5).
+export const adminCredential = pgTable("admin_credential", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: createdAt(),
+});
+
+// Failed sign-in attempts, used to slow down guessing. Only a hash of the IP is stored.
+export const adminLoginAttempt = pgTable(
+  "admin_login_attempt",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    ipHash: text("ip_hash").notNull(),
+    attemptedAt: timestamp("attempted_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("admin_login_attempt_ip_idx").on(t.ipHash, t.attemptedAt)],
+);
+
+// Every approval and revocation is recorded here.
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),
+    action: text("action").notNull(),
+    target: text("target").notNull(),
+    detail: jsonb("detail"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("audit_log_target_idx").on(t.target)],
+);
+
+// Result of the internal SEO bot for one URL.
+export const seoAudit = pgTable(
+  "seo_audit",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    url: text("url").notNull(),
+    statusCode: integer("status_code"),
+    issues: jsonb("issues").notNull(),
+    checkedAt: timestamp("checked_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("seo_audit_url_idx").on(t.url, t.checkedAt)],
+);
 
 // Official news from studios, distributors and platforms. Always linked to the source.
 export const announcement = pgTable(

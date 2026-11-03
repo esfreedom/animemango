@@ -21,6 +21,8 @@ import { preparePage, requestNow, SITE_NAME } from "@/lib/page";
 import { getCurrentUser } from "@/lib/session";
 import { hasThaiContent, resolveSynopsis, resolveTitle } from "@/lib/titles";
 import { formatAirTime } from "@/lib/time";
+import { translateValue } from "@/lib/labels";
+import { resolveTitleSource } from "@/lib/titles";
 import { slugify } from "@/lib/slug";
 
 type Props = PageProps<"/[locale]/anime/[slug]">;
@@ -41,8 +43,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = resolveTitle(data.titles, locale, data.anime.titleRomaji).title;
   const synopsis = resolveSynopsis(data.titles, locale)?.synopsis;
-  const description =
-    synopsis ?? `${title}: ${data.anime.format ?? ""} ${data.anime.episodeCount ?? ""} ${data.anime.genres.join(", ")}`.trim();
+  const tGenre = await getTranslations({ locale, namespace: "genre" });
+  const genres = data.anime.genres.map((genre) => translateValue(tGenre, genre)).join(", ");
+  const description = synopsis ?? `${title}: ${data.anime.episodeCount ?? ""} ${genres}`.trim();
 
   return {
     title,
@@ -91,8 +94,13 @@ export default async function AnimePage({ params, searchParams }: Props) {
   const tLang = await getTranslations("lang");
   const tComments = await getTranslations("comments");
   const tSeries = await getTranslations("series");
+  const tGenre = await getTranslations("genre");
+  const tFormat = await getTranslations("format");
+  const tSeasonName = await getTranslations("season");
+  const tAds = await getTranslations("ads");
 
   const title = resolveTitle(titles, locale, row.titleRomaji);
+  const titleSource = resolveTitleSource(titles, locale);
   const synopsis = resolveSynopsis(titles, locale);
   const shop = offersFor(row.slug);
   const season = seasons[0];
@@ -136,14 +144,24 @@ export default async function AnimePage({ params, searchParams }: Props) {
             </Link>
           )}
           {title.isFallback && <p className="text-sm text-muted">{row.titleRomaji}</p>}
+          {titleSource && (
+            <p className="text-xs text-muted">
+              {t("titleSource")}{" "}
+              <a href={titleSource} rel="noopener noreferrer" target="_blank" className="underline-offset-4 hover:underline">
+                {new URL(titleSource).hostname}
+              </a>
+            </p>
+          )}
 
           <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
-            {row.format && <Meta label={t("format")} value={row.format} />}
+            {row.format && <Meta label={t("format")} value={translateValue(tFormat, row.format)} />}
             {row.episodeCount && <Meta label={t("episodes")} value={String(row.episodeCount)} />}
             {row.averageScore && <Meta label={t("score")} value={`${row.averageScore}%`} />}
             {row.startDate && <Meta label={t("startDate")} value={row.startDate} />}
-            {season && <Meta label={t("season")} value={`${season.year} ${season.season}`} />}
-            {row.genres.length > 0 && <Meta label={t("genres")} value={row.genres.join(", ")} />}
+            {season && <Meta label={t("season")} value={`${tSeasonName(season.season)} ${season.year}`} />}
+            {row.genres.length > 0 && (
+              <Meta label={t("genres")} value={row.genres.map((genre) => translateValue(tGenre, genre)).join(", ")} />
+            )}
           </dl>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -285,7 +303,7 @@ export default async function AnimePage({ params, searchParams }: Props) {
         </Section>
       )}
 
-      <AdSlot label="Advertisement" consent={false} />
+      <AdSlot label={tAds("label")} consent={false} />
 
       <Section id="threads" title={tComments("title")}>
         {threadId ? (

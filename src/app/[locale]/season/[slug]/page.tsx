@@ -4,12 +4,18 @@ import { PosterCard } from "@/components/anime/PosterCard";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getSeasonAnime } from "@/data/catalog";
+import { localeAlternates } from "@/lib/alternates";
 import { preparePage } from "@/lib/page";
 import { currentSeason, parseSeasonSlug, seasonSlug } from "@/lib/slug";
 import { resolveTitle } from "@/lib/titles";
 
 // Renders per request (see preparePage), so instant-navigation validation is opted out.
 export const instant = false;
+
+export async function generateMetadata({ params }: PageProps<"/[locale]/season/[slug]">) {
+  const { locale, slug } = await params;
+  return { alternates: localeAlternates(locale, `/season/${slug}`) };
+}
 
 export default async function SeasonPage({ params }: PageProps<"/[locale]/season/[slug]">) {
   const locale = await preparePage(params);

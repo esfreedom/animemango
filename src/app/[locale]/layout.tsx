@@ -3,10 +3,15 @@ import { Inter, Noto_Sans_JP, Noto_Sans_Thai } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { cookies } from "next/headers";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { ConsentBanner } from "@/components/consent/ConsentBanner";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { routing } from "@/i18n/routing";
+import { CONSENT_COOKIE, isGaMeasurementId, parseConsent } from "@/lib/consent";
+import { themeScript } from "@/lib/theme";
 import "../globals.css";
 
 const latin = Inter({
@@ -29,8 +34,6 @@ const japanese = Noto_Sans_JP({
   preload: false,
 });
 
-// Applies the saved theme before first paint to avoid a light/dark flash.
-const themeScript = `(function(){try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t}}catch(e){}})();`;
 
 // Pages read the database per request (see preparePage), so the locale tree is
 // rendered at request time. Nothing that reads data runs during the build.
@@ -53,6 +56,10 @@ export async function generateMetadata({
     ),
     title: { default: t("title"), template: "%s | AnimeHub" },
     description: t("description"),
+    // Google Search Console ownership token. Set NEXT_PUBLIC_GSC_VERIFICATION to the token from GSC.
+    verification: process.env.NEXT_PUBLIC_GSC_VERIFICATION
+      ? { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION }
+      : undefined,
   };
 }
 
@@ -66,6 +73,9 @@ export default async function LocaleLayout({
 
   const messages = await getMessages();
   const t = await getTranslations("nav");
+
+  const consent = parseConsent((await cookies()).get(CONSENT_COOKIE)?.value);
+  const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
   return (
     <html
@@ -91,6 +101,8 @@ export default async function LocaleLayout({
           </main>
           <SiteFooter />
           <BottomNav />
+          {consent === null && <ConsentBanner />}
+          {consent === "accepted" && isGaMeasurementId(gaId) && <GoogleAnalytics id={gaId} />}
         </NextIntlClientProvider>
       </body>
     </html>

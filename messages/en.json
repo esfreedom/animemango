@@ -26,7 +26,10 @@
     "pageNotFound": "We could not find that page"
   },
   "theme": {
-    "toggle": "Toggle light or dark theme"
+    "label": "Theme",
+    "dark": "Dark",
+    "light": "Light",
+    "system": "System"
   },
   "locale": {
     "label": "Language",
@@ -64,7 +67,10 @@
       "hotThreads": "Popular threads"
     },
     "empty": "Nothing in this section yet",
-    "threadComments": "{count} comments"
+    "threadComments": "{count} comments",
+    "newBadge": "New",
+    "recent": "Latest episodes",
+    "nextEpisode": "Next episode"
   },
   "status": {
     "upcoming": "Upcoming",
@@ -108,7 +114,8 @@
     "followers": "{count} followers",
     "shop": "Official merchandise",
     "shopDisclosure": "Partner links: we may earn a commission when you buy through these links.",
-    "season": "Season"
+    "season": "Season",
+    "titleSource": "Thai title from"
   },
   "episode": {
     "title": "Episode {number}",
@@ -287,7 +294,15 @@
     "officialUrl": "Official website",
     "addPlatform": "Add platform",
     "done": "Saved",
-    "failed": "Could not save. Check the fields you entered"
+    "failed": "Could not save. Check the fields you entered",
+    "officialTitle": "Official Thai title",
+    "officialTitleHelp": "Enter only a Thai title that appears on an official source, such as a platform or a Thai distributor. Links from AniList are not accepted.",
+    "officialTitleField": "Thai title",
+    "officialSourceField": "Link to the official page showing this title",
+    "saveTitle": "Save Thai title",
+    "titleSource": "Thai title from",
+    "studiosManage": "Manage studios and channels",
+    "seoManage": "View SEO bot report"
   },
   "errors": {
     "generic": "Something went wrong. Please try again"
@@ -310,5 +325,130 @@
     "none": "No preference",
     "noSub": "No subtitles",
     "remembered": "We remember this for next time"
+  },
+  "genre": {
+    "action": "Action",
+    "adventure": "Adventure",
+    "comedy": "Comedy",
+    "drama": "Drama",
+    "ecchi": "Ecchi",
+    "fantasy": "Fantasy",
+    "hentai": "Hentai",
+    "horror": "Horror",
+    "mahou_shoujo": "Mahou Shoujo",
+    "mecha": "Mecha",
+    "music": "Music",
+    "mystery": "Mystery",
+    "psychological": "Psychological",
+    "romance": "Romance",
+    "sci_fi": "Sci-Fi",
+    "slice_of_life": "Slice of Life",
+    "sports": "Sports",
+    "supernatural": "Supernatural",
+    "thriller": "Thriller"
+  },
+  "format": {
+    "TV": "TV",
+    "TV_SHORT": "TV Short",
+    "MOVIE": "Movie",
+    "SPECIAL": "Special",
+    "OVA": "OVA",
+    "ONA": "ONA",
+    "MUSIC": "Music"
+  },
+  "timezones": {
+    "bangkok": "Thailand (Asia/Bangkok)",
+    "tokyo": "Japan (Asia/Tokyo)",
+    "utc": "UTC",
+    "london": "London (Europe/London)",
+    "new_york": "New York (America/New_York)"
+  },
+  "ads": {
+    "label": "Advertisement"
+  },
+  "studio": {
+    "title": "Studios and publishers",
+    "works": "Works",
+    "noWorks": "No linked titles yet",
+    "channels": "Official channels",
+    "noChannels": "No approved channels yet",
+    "approved": "Approved",
+    "pending": "Pending review",
+    "revoked": "Revoked",
+    "officialSite": "Official website",
+    "trailerAllowed": "Trailers may be embedded",
+    "kind": {
+      "studio": "Anime studio",
+      "distributor": "Distributor",
+      "platform": "Platform",
+      "rights_holder": "Rights holder"
+    },
+    "adminTitle": "Manage studios and channels",
+    "createTitle": "Create a studio profile",
+    "name": "Name (romaji)",
+    "slug": "slug (lowercase English)",
+    "kindField": "Type",
+    "website": "Official website (https)",
+    "create": "Create profile",
+    "channelTitle": "Add an official channel",
+    "studioSlug": "Studio slug",
+    "platformField": "Platform",
+    "channelIdField": "Channel ID",
+    "channelUrl": "Channel link (https)",
+    "evidence": "Link that shows the channel is official",
+    "addChannel": "Add channel (pending)",
+    "approve": "Approve trailer embeds",
+    "revoke": "Revoke",
+    "linkTitle": "Link a title to a studio",
+    "animeSlug": "Title slug",
+    "roleField": "Role",
+    "roles": {
+      "produce": "Produces",
+      "distribute": "Distributes",
+      "licensor": "Licensor"
+    },
+    "link": "Link",
+    "unlink": "Remove link",
+    "backToAdmin": "Back to admin"
+  },
+  "adminLogin": {
+    "title": "Back-office sign-in",
+    "description": "For the team only. Available in development only.",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Sign in",
+    "errors": {
+      "invalid": "Username or password is incorrect.",
+      "too_many": "Too many failed attempts. Wait 15 minutes and try again.",
+      "disabled": "Password sign-in is turned off in this environment.",
+      "not_configured": "ADMIN_SESSION_SECRET is not set."
+    }
+  },
+  "consent": {
+    "title": "Cookies",
+    "body": "We use analytics cookies (Google Analytics) only if you accept. If you decline, this tool does not load.",
+    "privacyLink": "Read the privacy policy",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "seoAudit": {
+    "title": "SEO bot",
+    "description": "The bot checks a random sample of public pages from the sitemap every hour. Only the newest check of each URL is shown.",
+    "summary": "Summary",
+    "none": "No checks have run yet",
+    "lastRun": "Last run {time}",
+    "checked": "{count} pages checked",
+    "flagged": "Pages with issues",
+    "noneFlagged": "No issues in the latest checks",
+    "backToAdmin": "Back to admin",
+    "issues": {
+      "status_not_200": "Status is not 200",
+      "missing_title": "Missing title",
+      "missing_description": "Missing description",
+      "canonical_mismatch": "Canonical mismatch",
+      "missing_hreflang": "Incomplete hreflang",
+      "missing_jsonld": "Missing structured data",
+      "noindex_mismatch": "noindex does not match the rule"
+    }
   }
 }

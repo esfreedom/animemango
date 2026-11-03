@@ -17,7 +17,9 @@ import {
   watchOrderEntry,
   comment,
   series,
+  studioChannel,
 } from "@/db/schema";
+import { canEmbedTrailer } from "@/lib/trailer";
 import type { Season } from "@/lib/slug";
 
 // Public catalog reads. Each function is cached and tagged, so the sync job and admin
@@ -44,7 +46,18 @@ export async function getAnimeBySlug(slug: string) {
       .from(episode)
       .where(eq(episode.animeId, row.id))
       .orderBy(asc(episode.number)),
-    db.select().from(trailer).where(and(eq(trailer.animeId, row.id), eq(trailer.channelVerified, true))),
+    // Only trailers whose channel is approved for trailers are returned (approved plan, section 3).
+    db
+      .select({
+        id: trailer.id,
+        youtubeId: trailer.youtubeId,
+        status: studioChannel.status,
+        allowTrailer: studioChannel.allowTrailer,
+      })
+      .from(trailer)
+      .innerJoin(studioChannel, eq(trailer.studioChannelId, studioChannel.id))
+      .where(eq(trailer.animeId, row.id))
+      .then((rows) => rows.filter((item) => canEmbedTrailer({ status: item.status, allowTrailer: item.allowTrailer }))),
     db.select({ id: thread.id }).from(thread).where(eq(thread.animeId, row.id)).limit(1),
   ]);
 
@@ -449,7 +462,7 @@ export async function getWatchOrder(animeId: string) {
 
 // Loads titles for many anime at once, keyed by anime id. Used by the list queries above.
 async function loadTitles(db: ReturnType<typeof getDb>, animeIds: string[]) {
-  const map = new Map<string, { locale: string; title: string; source: string }[]>();
+  const map = new Map<string, { locale: string; title: string; source: string; sourceUrl: string | null }[]>();
   if (animeIds.length === 0) return map;
 
   const rows = await db
@@ -458,13 +471,14 @@ async function loadTitles(db: ReturnType<typeof getDb>, animeIds: string[]) {
       locale: animeI18n.locale,
       title: animeI18n.title,
       source: animeI18n.source,
+      sourceUrl: animeI18n.sourceUrl,
     })
     .from(animeI18n)
     .where(inArray(animeI18n.animeId, animeIds));
 
   for (const row of rows) {
     const list = map.get(row.animeId) ?? [];
-    list.push({ locale: row.locale, title: row.title, source: row.source });
+    list.push({ locale: row.locale, title: row.title, source: row.source, sourceUrl: row.sourceUrl });
     map.set(row.animeId, list);
   }
   return map;
