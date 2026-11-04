@@ -79,6 +79,29 @@ export async function syncAiringWindow({
   return result;
 }
 
+// Adds one title by its AniList id, along with its franchise. Used by the back office and the
+// seed script. A new title stays unpublished until an admin publishes it. Returns null when AniList
+// has no usable entry for the id (unknown, or adult content that is skipped).
+export async function importAnimeByAniListId({
+  db,
+  anilistId,
+  now = new Date(),
+  fetchImpl,
+}: {
+  db: Db;
+  anilistId: number;
+  now?: Date;
+  fetchImpl?: FetchLike;
+}): Promise<{ animeId: string } | null> {
+  const media = await fetchMediaWithRelations(anilistId, fetchImpl);
+  const mapped = media ? mapMedia(media) : null;
+  if (!mapped) return null;
+
+  const counts = await db.transaction((tx) => syncTitle(tx, mapped, [], now));
+  await attachSeries(db, anilistId, now, fetchImpl);
+  return { animeId: counts.animeId };
+}
+
 async function syncTitle(
   tx: Tx,
   mapped: MappedAnime,

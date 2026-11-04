@@ -33,7 +33,8 @@ export async function getAnimeBySlug(slug: string) {
 
   const db = getDb();
   const [row] = await db.select().from(anime).where(eq(anime.slug, slug)).limit(1);
-  if (!row) return null;
+  // Unpublished titles look like missing ones to the public.
+  if (!row || !row.published) return null;
 
   const [parentRows, titles, seasons, episodes, trailers, threads] = await Promise.all([
     row.seriesId
@@ -299,7 +300,7 @@ export async function searchAnime(filters: SearchFilters, limit = 48) {
   cacheLife("minutes");
 
   const db = getDb();
-  const conditions: SQL[] = [];
+  const conditions: SQL[] = [eq(anime.published, true)];
 
   if (filters.query?.trim()) {
     const pattern = `%${filters.query.trim()}%`;
@@ -357,7 +358,7 @@ export async function getGenres() {
 
   const db = getDb();
   const rows = await db.execute<{ genre: string }>(
-    sql`select distinct unnest(genres) as genre from ${anime} order by genre`,
+    sql`select distinct unnest(genres) as genre from ${anime} where ${anime.published} = true order by genre`,
   );
   return rows.map((row) => row.genre);
 }

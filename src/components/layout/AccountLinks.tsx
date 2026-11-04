@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { signOut } from "@/actions/auth";
 import { Link } from "@/i18n/navigation";
+import { adminHomeUrl } from "@/lib/admin-host";
 import { getCurrentUser, canModerate } from "@/lib/session";
 import { getUnreadCountSafe } from "./unread";
 
@@ -20,6 +21,8 @@ export async function AccountLinks({ locale }: { locale: string }) {
   }
 
   const unread = await getUnreadCountSafe(user.id);
+  // The back office is on its own host, so this is a plain link to that host.
+  const adminUrl = adminHomeUrl(process.env.ADMIN_SITE_URL);
 
   return (
     <div className="flex items-center gap-1">
@@ -32,10 +35,10 @@ export async function AccountLinks({ locale }: { locale: string }) {
       <Link href={`/u/${user.username}`} className={`${linkClass} hidden sm:inline-block`}>
         {t("profile")}
       </Link>
-      {canModerate(user) && (
-        <Link href="/admin" className={`${linkClass} hidden sm:inline-block`}>
+      {canModerate(user) && adminUrl && (
+        <a href={adminUrl} className={`${linkClass} hidden sm:inline-block`}>
           {t("admin")}
-        </Link>
+        </a>
       )}
       <form action={signOut}>
         <input type="hidden" name="locale" value={locale} />

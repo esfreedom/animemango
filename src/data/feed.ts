@@ -132,7 +132,7 @@ export async function getSeriesEntries(seriesSlug: string, now: Date) {
   const members = await db
     .select({ id: anime.id })
     .from(anime)
-    .where(eq(anime.seriesId, parent.id))
+    .where(and(eq(anime.seriesId, parent.id), eq(anime.published, true)))
     .orderBy(asc(anime.sortOrder));
 
   const episodes = await db
@@ -183,7 +183,7 @@ async function loadEntries(
       })
       .from(anime)
       .leftJoin(series, eq(anime.seriesId, series.id))
-      .where(inArray(anime.id, ids)),
+      .where(and(inArray(anime.id, ids), eq(anime.published, true))),
     db
       .select({
         animeId: animeI18n.animeId,

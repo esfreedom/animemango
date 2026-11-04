@@ -177,7 +177,6 @@ export default async function AnimePage({ params, searchParams }: Props) {
                 unfollow: t("unfollow"),
                 votes: t("votes", { count: voteState.votes }),
                 followers: t("followers", { count: followers }),
-                signIn: tCommon("signInFirst"),
               }}
             />
             <Link href={`/anime/${row.slug}/watch-order`} className="rounded-md border border-line px-3 py-2 text-sm text-ink hover:bg-raised">
@@ -325,7 +324,8 @@ function Meta({ label, value }: { label: string; value: string }) {
   );
 }
 
-// Plain forms that call server actions. They work without JavaScript.
+// Plain forms that call server actions. They work without JavaScript. Guests see the counts only,
+// because signing in is for joining the discussion.
 function VoteFollowControls({
   animeId,
   signedIn,
@@ -337,14 +337,12 @@ function VoteFollowControls({
   signedIn: boolean;
   voted: boolean;
   following: boolean;
-  labels: Record<"vote" | "unvote" | "follow" | "unfollow" | "votes" | "followers" | "signIn", string>;
+  labels: Record<"vote" | "unvote" | "follow" | "unfollow" | "votes" | "followers", string>;
 }) {
   if (!signedIn) {
     return (
       <p className="text-sm text-muted">
-        <Link href="/login" className="text-ink underline underline-offset-4">
-          {labels.signIn}
-        </Link>
+        {labels.votes} · {labels.followers}
       </p>
     );
   }

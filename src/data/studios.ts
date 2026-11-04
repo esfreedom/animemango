@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { anime, animeStudio, studio, studioChannel } from "@/db/schema";
 
@@ -65,7 +65,7 @@ export async function getStudioBySlug(slug: string) {
       })
       .from(animeStudio)
       .innerJoin(anime, eq(animeStudio.animeId, anime.id))
-      .where(eq(animeStudio.studioId, row.id)),
+      .where(and(eq(animeStudio.studioId, row.id), eq(anime.published, true))),
   ]);
 
   return { studio: row, channels, titles };

@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { MetadataRoute } from "next";
 import { connection } from "next/server";
 import { getDb } from "@/db/client";
@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select({ slug: anime.slug })
     .from(anime)
     .innerJoin(animeI18n, eq(animeI18n.animeId, anime.id))
-    .where(eq(animeI18n.locale, "th"));
+    .where(and(eq(animeI18n.locale, "th"), eq(anime.published, true)));
   const withThai = new Set(thaiRows.map((row) => row.slug));
 
   const titles = (await db.select({ slug: anime.slug, updatedAt: anime.updatedAt }).from(anime)).filter((row) =>

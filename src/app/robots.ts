@@ -3,7 +3,7 @@ import { getSiteUrl } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/notifications", "/login", "/auth/"] }],
+    rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/admin-app", "/notifications", "/login", "/auth/"] }],
     sitemap: `${getSiteUrl()}/sitemap.xml`,
   };
 }

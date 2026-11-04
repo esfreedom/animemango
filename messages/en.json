@@ -22,7 +22,6 @@
     "notAvailable": "No data yet",
     "source": "Source",
     "more": "See all",
-    "signInFirst": "Sign in first to do this",
     "pageNotFound": "We could not find that page"
   },
   "theme": {
@@ -417,11 +416,14 @@
     "username": "Username",
     "password": "Password",
     "submit": "Sign in",
+    "google": "Sign in with Google",
+    "divider": "or",
     "errors": {
       "invalid": "Username or password is incorrect.",
       "too_many": "Too many failed attempts. Wait 15 minutes and try again.",
       "disabled": "Password sign-in is turned off in this environment.",
-      "not_configured": "ADMIN_SESSION_SECRET is not set."
+      "not_configured": "Sign-in is not configured. Check the values in your .env file.",
+      "oauth_failed": "Google sign-in did not work. Please try again."
     }
   },
   "consent": {

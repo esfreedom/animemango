@@ -3,7 +3,7 @@ import { seoAudit } from "@/db/schema";
 import { BOT_USER_AGENT, runSeoBot, SAMPLE_LIMIT, type FetchedPage } from "@/lib/seo-bot";
 import { getSiteUrl } from "@/lib/site";
 
-// Checks a random sample of public pages from the sitemap and stores the results for /admin/seo.
+// Checks a random sample of public pages from the sitemap and stores the results for the back office at /seo.
 // Runs hourly (see vercel.json). The sample is capped, and each request waits a second.
 export const maxDuration = 300;
 

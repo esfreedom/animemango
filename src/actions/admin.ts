@@ -2,12 +2,15 @@
 
 import { and, eq, isNull } from "drizzle-orm";
 import { updateTag } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
+import { importAnimeByAniListId } from "@/anilist/sync";
 import { getDb } from "@/db/client";
 import {
   anime,
   animeI18n,
   announcement,
+  auditLog,
   proposal,
   availabilityLog,
   studioChannel,
@@ -47,6 +50,58 @@ async function animeBySlug(slug: string | undefined) {
     .where(eq(anime.slug, slug))
     .limit(1);
   return row ?? null;
+}
+
+// ---- Anime list and publishing ------------------------------------------------
+
+// Adds a title from AniList as an unpublished draft. An admin publishes it from the list.
+export async function createAnimeFromAniList(formData: FormData): Promise<void> {
+  const user = await requireAdmin();
+  if (!user) throw new Error("forbidden");
+
+  const parsed = z.coerce.number().int().positive().safeParse(formString(formData, "anilistId"));
+  if (!parsed.success) throw new Error("invalid_form");
+
+  const db = getDb();
+  const created = await importAnimeByAniListId({ db, anilistId: parsed.data });
+  if (!created) throw new Error("anilist_not_found");
+
+  await db.insert(auditLog).values({
+    actorUserId: user.id,
+    action: "anime.import",
+    target: `anime:${created.animeId}`,
+    detail: { anilistId: parsed.data },
+  });
+
+  updateTag("anime");
+  redirect("/anime?show=draft");
+}
+
+// Publishes or unpublishes a title. Unpublished titles disappear from every public page at once.
+export async function setAnimePublished(formData: FormData): Promise<void> {
+  const user = await requireAdmin();
+  if (!user) throw new Error("forbidden");
+
+  const animeId = z.uuid().safeParse(formString(formData, "animeId"));
+  if (!animeId.success) throw new Error("invalid_form");
+  const published = formString(formData, "published") === "true";
+
+  const db = getDb();
+  const [row] = await db
+    .update(anime)
+    .set({ published, updatedAt: new Date() })
+    .where(eq(anime.id, animeId.data))
+    .returning({ slug: anime.slug });
+  if (!row) throw new Error("anime_not_found");
+
+  await db.insert(auditLog).values({
+    actorUserId: user.id,
+    action: published ? "anime.publish" : "anime.unpublish",
+    target: `anime:${animeId.data}`,
+  });
+
+  updateTag(`anime:${row.slug}`);
+  updateTag("anime");
 }
 
 // ---- Proposal queue (DESIGN.md section 8, approved series plan section 6) -----

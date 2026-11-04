@@ -121,6 +121,8 @@ export const anime = pgTable(
     malId: integer("mal_id").unique(),
     anilistId: integer("anilist_id").unique(),
     status: animeStatusEnum("status").notNull().default("upcoming"),
+    // Only published titles reach the public site. New titles start unpublished and an admin publishes them.
+    published: boolean("published").notNull().default(false),
     format: text("format"),
     episodeCount: integer("episode_count"),
     genres: text("genres").array().notNull().default(sql`'{}'`),

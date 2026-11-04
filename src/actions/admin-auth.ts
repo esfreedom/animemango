@@ -13,20 +13,19 @@ import {
   verifyPassword,
 } from "@/lib/admin-password";
 import { ADMIN_USERNAME, SESSION_COOKIE, SESSION_TTL_MS, signSession } from "@/lib/admin-session";
-import { parseLocale, formString } from "./shared";
+import { createSupabaseServerClient, isAuthConfigured } from "@/lib/supabase/server";
+import { formString } from "./shared";
 
 const MIN_SECRET_LENGTH = 32;
 
 // Back-office sign-in with a username and password (development only, see isPasswordLoginEnabled).
+// The pages live on the admin host, so every redirect here is relative to that host.
 // Failures are counted per address hash, and too many in the window blocks further attempts.
 export async function loginAdmin(formData: FormData) {
-  const locale = parseLocale(formData.get("locale"));
-  const loginPath = `/${locale}/admin/login`;
-
-  if (!isPasswordLoginEnabled()) redirect(`${loginPath}?error=disabled`);
+  if (!isPasswordLoginEnabled()) redirect("/login?error=disabled");
 
   const secret = process.env.ADMIN_SESSION_SECRET;
-  if (!secret || secret.length < MIN_SECRET_LENGTH) redirect(`${loginPath}?error=not_configured`);
+  if (!secret || secret.length < MIN_SECRET_LENGTH) redirect("/login?error=not_configured");
 
   const db = getDb();
   const now = new Date();
@@ -35,7 +34,7 @@ export async function loginAdmin(formData: FormData) {
     .select({ failures: count() })
     .from(adminLoginAttempt)
     .where(and(eq(adminLoginAttempt.ipHash, ipHash), gt(adminLoginAttempt.attemptedAt, new Date(now.getTime() - LOGIN_WINDOW_MS))));
-  if (isLoginBlocked(Number(failures))) redirect(`${loginPath}?error=too_many`);
+  if (isLoginBlocked(Number(failures))) redirect("/login?error=too_many");
 
   const username = formString(formData, "username") ?? "";
   const password = String(formData.get("password") ?? "");
@@ -46,7 +45,7 @@ export async function loginAdmin(formData: FormData) {
 
   if (!credential || !valid || username !== ADMIN_USERNAME) {
     await db.insert(adminLoginAttempt).values({ ipHash, attemptedAt: now });
-    redirect(`${loginPath}?error=invalid`);
+    redirect("/login?error=invalid");
   }
 
   const token = signSession({ username: ADMIN_USERNAME, issuedAt: now.getTime() }, secret);
@@ -65,7 +64,18 @@ export async function loginAdmin(formData: FormData) {
     await db.insert(auditLog).values({ actorUserId: account.id, action: "admin.login", target: `user:${account.id}` });
   }
 
-  redirect(`/${locale}/admin`);
+  redirect("/");
+}
+
+// Ends both the back-office session and a Google session on this host, if there is one.
+export async function logoutAdmin() {
+  if (isAuthConfigured()) {
+    const supabase = await createSupabaseServerClient();
+    await supabase.auth.signOut();
+  }
+  const cookieStore = await cookies();
+  cookieStore.delete(SESSION_COOKIE);
+  redirect("/login");
 }
 
 // Hashes the caller's address with the session secret, so the database never holds a raw IP.

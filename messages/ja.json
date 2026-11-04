@@ -22,7 +22,6 @@
     "notAvailable": "まだ情報がありません",
     "source": "出典",
     "more": "すべて見る",
-    "signInFirst": "この操作にはログインが必要です",
     "pageNotFound": "お探しのページが見つかりません"
   },
   "theme": {
@@ -417,11 +416,14 @@
     "username": "ユーザー名",
     "password": "パスワード",
     "submit": "ログイン",
+    "google": "Google でログイン",
+    "divider": "または",
     "errors": {
       "invalid": "ユーザー名またはパスワードが正しくありません。",
       "too_many": "失敗が続いたため、15分後にお試しください。",
       "disabled": "この環境ではパスワードログインは無効です。",
-      "not_configured": "ADMIN_SESSION_SECRET が設定されていません。"
+      "not_configured": "ログイン設定がされていません。.env の値を確認してください。",
+      "oauth_failed": "Google でのログインに失敗しました。もう一度お試しください。"
     }
   },
   "consent": {

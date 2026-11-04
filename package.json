@@ -12,7 +12,8 @@
     "db:generate": "drizzle-kit generate",
     "db:dev": "tsx scripts/dev-db.ts",
     "db:migrate": "tsx scripts/migrate.ts",
-    "db:seed-admin": "tsx scripts/seed-dev-admin.ts"
+    "db:seed-admin": "tsx scripts/seed-dev-admin.ts",
+    "db:seed-muse": "tsx scripts/seed-muse.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

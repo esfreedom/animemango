@@ -2,7 +2,7 @@ import { desc } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { seoAudit } from "@/db/schema";
 
-// The most recent bot checks, newest first. /admin/seo summarizes them.
+// The most recent bot checks, newest first. The back-office SEO page summarizes them.
 export async function getRecentSeoAudits(limit = 200) {
   return getDb()
     .select({
