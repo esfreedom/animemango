@@ -9,9 +9,6 @@ import { getRecentReports } from "@/data/community";
 import { listChannels } from "@/data/studios";
 import { canModerate, getCurrentUser } from "@/lib/session";
 
-// Reads the session and data per request, so instant-navigation validation is opted out.
-export const instant = false;
-
 export default async function AdminOverviewPage() {
   await connection();
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin" });

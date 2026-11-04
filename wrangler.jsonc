@@ -1,0 +1,13 @@
+{
+  // Cloudflare Workers config for the OpenNext build. Secrets (DATABASE_URL, Supabase keys, ...)
+  // are set in the Cloudflare dashboard or with `wrangler secret put`, never in this file.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "animemango",
+  "compatibility_date": "2026-05-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  }
+}

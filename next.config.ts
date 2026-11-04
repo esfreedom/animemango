@@ -5,8 +5,9 @@ import type { NextConfig } from "next";
 // @swc/core on import, which fails on machines where the SWC native cache
 // cannot be validated (seen on Windows with restrictive ACLs).
 const nextConfig: NextConfig = {
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Off on purpose. With Cache Components on, Workers requests hang on Cloudflare (OpenNext).
+  // Pages are rendered per request, and data is read from the database every time.
+  cacheComponents: false,
   images: {
     // Posters and banners come from the AniList CDN, as returned by the API.
     remotePatterns: [

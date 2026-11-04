@@ -7,9 +7,6 @@ import { preparePage } from "@/lib/page";
 import { getCurrentUser } from "@/lib/session";
 import { formatAirTime } from "@/lib/time";
 
-// Renders per request (see preparePage), so instant-navigation validation is opted out.
-export const instant = false;
-
 export default async function NotificationsPage({ params }: PageProps<"/[locale]/notifications">) {
   const locale = await preparePage(params);
   const t = await getTranslations("notifications");

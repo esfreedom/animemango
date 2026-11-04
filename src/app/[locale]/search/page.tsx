@@ -8,9 +8,6 @@ import { preparePage } from "@/lib/page";
 import { resolveTitle } from "@/lib/titles";
 import { translateValue } from "@/lib/labels";
 
-// Renders per request (see preparePage), so instant-navigation validation is opted out.
-export const instant = false;
-
 export async function generateMetadata({ params }: PageProps<"/[locale]/search">) {
   const { locale } = await params;
   return { alternates: localeAlternates(locale, "/search") };

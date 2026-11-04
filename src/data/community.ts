@@ -1,5 +1,4 @@
 import { and, count, desc, eq, isNull, gte } from "drizzle-orm";
-import { cacheLife, cacheTag } from "next/cache";
 import { getDb } from "@/db/client";
 import {
   anime,
@@ -16,9 +15,6 @@ import type { CommentLang } from "@/lib/lang";
 // Postings call updateTag("thread:<id>"). Per-user state is read on every request.
 
 export async function getThreadComments(threadId: string, lang?: CommentLang) {
-  "use cache";
-  cacheTag(`thread:${threadId}`);
-  cacheLife("minutes");
 
   const db = getDb();
   const conditions = [eq(comment.threadId, threadId), eq(comment.status, "visible")];
@@ -42,9 +38,6 @@ export async function getThreadComments(threadId: string, lang?: CommentLang) {
 }
 
 export async function getThreadLanguageCounts(threadId: string) {
-  "use cache";
-  cacheTag(`thread:${threadId}`);
-  cacheLife("minutes");
 
   const rows = await getDb()
     .select({ lang: comment.lang, total: count() })

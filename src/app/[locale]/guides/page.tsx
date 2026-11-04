@@ -4,9 +4,6 @@ import { GUIDES } from "@/content/guides";
 import { localeAlternates } from "@/lib/alternates";
 import { preparePage } from "@/lib/page";
 
-// Renders per request (see preparePage), so instant-navigation validation is opted out.
-export const instant = false;
-
 export async function generateMetadata({ params }: PageProps<"/[locale]/guides">) {
   const { locale } = await params;
   return { alternates: localeAlternates(locale, "/guides") };

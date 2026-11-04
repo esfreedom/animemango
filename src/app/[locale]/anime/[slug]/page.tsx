@@ -30,9 +30,6 @@ type Props = PageProps<"/[locale]/anime/[slug]">;
 // Availability older than this is flagged as unconfirmed (DESIGN.md section 7).
 const STALE_AFTER_MS = 30 * 24 * 60 * 60 * 1000;
 
-// Renders per request (see preparePage), so instant-navigation validation is opted out.
-export const instant = false;
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();

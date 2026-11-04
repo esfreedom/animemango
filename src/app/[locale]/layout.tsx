@@ -37,8 +37,6 @@ const japanese = Noto_Sans_JP({
 
 // Pages read the database per request (see preparePage), so the locale tree is
 // rendered at request time. Nothing that reads data runs during the build.
-export const instant = false;
-
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }

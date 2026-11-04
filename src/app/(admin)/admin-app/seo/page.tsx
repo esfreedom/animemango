@@ -8,9 +8,6 @@ import { getCurrentUser, isAdmin } from "@/lib/session";
 import { summarizeIssues, type SeoIssue } from "@/lib/seo-audit";
 import { formatAirTime } from "@/lib/time";
 
-// Reads the session and data per request, so instant-navigation validation is opted out.
-export const instant = false;
-
 const ISSUES = [
   "status_not_200",
   "missing_title",

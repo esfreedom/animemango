@@ -16,9 +16,6 @@ import { getActiveAvailability } from "@/data/admin";
 import { getPlatforms } from "@/data/catalog";
 import { getCurrentUser, isAdmin } from "@/lib/session";
 
-// Reads the session and data per request, so instant-navigation validation is opted out.
-export const instant = false;
-
 export default async function AdminCatalogPage() {
   await connection();
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin" });

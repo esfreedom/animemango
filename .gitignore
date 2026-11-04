@@ -41,3 +41,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /.pglite
+
+# Cloudflare build output
+.open-next
+.wrangler
+
+# Local Worker secrets
+.dev.vars*

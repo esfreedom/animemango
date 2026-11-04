@@ -8,9 +8,6 @@ import { getProfile } from "@/data/community";
 import { preparePage } from "@/lib/page";
 import { formatAirTime } from "@/lib/time";
 
-// Renders per request (see preparePage), so instant-navigation validation is opted out.
-export const instant = false;
-
 export default async function ProfilePage({ params }: PageProps<"/[locale]/u/[username]">) {
   const locale = await preparePage(params);
   const { username } = await params;

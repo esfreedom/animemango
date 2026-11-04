@@ -23,9 +23,6 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { listChannels, listStudioLinks, listStudios } from "@/data/studios";
 import { getCurrentUser, isAdmin } from "@/lib/session";
 
-// Reads the session and data per request, so instant-navigation validation is opted out.
-export const instant = false;
-
 const KINDS = ["studio", "distributor", "platform", "rights_holder"] as const;
 const ROLES = ["produce", "distribute", "licensor"] as const;
 const PLATFORMS = ["youtube", "facebook", "x", "website"] as const;

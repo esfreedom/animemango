@@ -9,9 +9,6 @@ import { getOpenTakedowns, getPendingProposals } from "@/data/admin";
 import { getRecentReports } from "@/data/community";
 import { canModerate, getCurrentUser, isAdmin } from "@/lib/session";
 
-// Reads the session and data per request, so instant-navigation validation is opted out.
-export const instant = false;
-
 export default async function AdminModerationPage() {
   await connection();
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin" });

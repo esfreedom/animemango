@@ -14,9 +14,6 @@ import { preparePage } from "@/lib/page";
 import { resolveTitle } from "@/lib/titles";
 import { JsonLd } from "@/components/seo/JsonLd";
 
-// Renders per request (see preparePage), so instant-navigation validation is opted out.
-export const instant = false;
-
 type Props = PageProps<"/[locale]/series/[slug]">;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

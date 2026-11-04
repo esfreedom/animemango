@@ -9,9 +9,6 @@ import { slugify } from "@/lib/slug";
 import { resolveTitle } from "@/lib/titles";
 import { formatAirTime } from "@/lib/time";
 
-// Renders per request (see preparePage), so instant-navigation validation is opted out.
-export const instant = false;
-
 export default async function WhereToWatchPage({ params }: PageProps<"/[locale]/where-to-watch/[platform]">) {
   const locale = await preparePage(params);
   const { platform: platformSlug } = await params;

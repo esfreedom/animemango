@@ -7,9 +7,6 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { countAnimeByPublished, listAnimeForAdmin, type AnimeShow } from "@/data/admin";
 import { getCurrentUser, isAdmin } from "@/lib/session";
 
-// Reads the session and data per request, so instant-navigation validation is opted out.
-export const instant = false;
-
 const TABS: { show: AnimeShow; label: string }[] = [
   { show: "all", label: "ทั้งหมด" },
   { show: "published", label: "เผยแพร่แล้ว" },

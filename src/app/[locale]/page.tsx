@@ -15,9 +15,6 @@ import { readPrefs } from "@/lib/prefs-server";
 import { getCurrentUser } from "@/lib/session";
 import { PrefsControl } from "@/components/prefs/PrefsControl";
 
-// Renders per request (see preparePage), so instant-navigation validation is opted out.
-export const instant = false;
-
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">) {

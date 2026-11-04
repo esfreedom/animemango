@@ -1,5 +1,4 @@
 import { and, asc, desc, eq, gte, inArray, isNull, lt, sql, type SQL } from "drizzle-orm";
-import { cacheLife, cacheTag } from "next/cache";
 import { getDb } from "@/db/client";
 import {
   anime,
@@ -27,9 +26,6 @@ import type { Season } from "@/lib/slug";
 // Callers await connection() first, so nothing here runs during the build.
 
 export async function getAnimeBySlug(slug: string) {
-  "use cache";
-  cacheTag("anime", `anime:${slug}`);
-  cacheLife("hours");
 
   const db = getDb();
   const [row] = await db.select().from(anime).where(eq(anime.slug, slug)).limit(1);
@@ -74,9 +70,6 @@ export async function getAnimeBySlug(slug: string) {
 }
 
 export async function getEpisodeDetail(animeSlug: string, number: number) {
-  "use cache";
-  cacheTag("anime", `anime:${animeSlug}`);
-  cacheLife("hours");
 
   const db = getDb();
   const [row] = await db
@@ -121,9 +114,6 @@ export type AiringItem = {
 
 // Episodes airing in [from, to). Used by the home feed and the schedule page.
 export async function getAiringBetween(from: Date, to: Date, limit = 60): Promise<AiringItem[]> {
-  "use cache";
-  cacheTag("anime", "schedule");
-  cacheLife("minutes");
 
   const db = getDb();
   const rows = await db
@@ -153,9 +143,6 @@ export async function getAiringBetween(from: Date, to: Date, limit = 60): Promis
 }
 
 export async function getAnnouncements(limit = 6) {
-  "use cache";
-  cacheTag("anime", "announcements");
-  cacheLife("minutes");
 
   const db = getDb();
   return db
@@ -166,9 +153,6 @@ export async function getAnnouncements(limit = 6) {
 }
 
 export async function getAvailabilityChanges(limit = 8) {
-  "use cache";
-  cacheTag("anime", "availability");
-  cacheLife("minutes");
 
   const db = getDb();
   return db
@@ -190,9 +174,6 @@ export async function getAvailabilityChanges(limit = 8) {
 
 // Threads with the most visible comments since `since`.
 export async function getHotThreads(since: Date, limit = 6) {
-  "use cache";
-  cacheTag("anime", "threads");
-  cacheLife("minutes");
 
   const db = getDb();
   const counts = await db
@@ -259,9 +240,6 @@ export async function getHotThreads(since: Date, limit = 6) {
 }
 
 export async function getSeasonAnime(year: number, season: Season) {
-  "use cache";
-  cacheTag("anime", `season:${year}-${season}`);
-  cacheLife("hours");
 
   const db = getDb();
   const rows = await db
@@ -295,9 +273,6 @@ export type SearchFilters = {
 };
 
 export async function searchAnime(filters: SearchFilters, limit = 48) {
-  "use cache";
-  cacheTag("anime", "search");
-  cacheLife("minutes");
 
   const db = getDb();
   const conditions: SQL[] = [eq(anime.published, true)];
@@ -352,9 +327,6 @@ export async function searchAnime(filters: SearchFilters, limit = 48) {
 }
 
 export async function getGenres() {
-  "use cache";
-  cacheTag("anime", "genres");
-  cacheLife("days");
 
   const db = getDb();
   const rows = await db.execute<{ genre: string }>(
@@ -364,17 +336,11 @@ export async function getGenres() {
 }
 
 export async function getPlatforms() {
-  "use cache";
-  cacheTag("platforms");
-  cacheLife("days");
 
   return getDb().select().from(platform).orderBy(asc(platform.name));
 }
 
 export async function getWhereToWatch(platformId: number) {
-  "use cache";
-  cacheTag("anime", `platform:${platformId}`);
-  cacheLife("minutes");
 
   const db = getDb();
   const rows = await db
@@ -398,9 +364,6 @@ export async function getWhereToWatch(platformId: number) {
 }
 
 export async function getAvailabilityForAnime(animeId: string) {
-  "use cache";
-  cacheTag("anime", `availability:${animeId}`);
-  cacheLife("minutes");
 
   const db = getDb();
   const [current, history] = await Promise.all([
@@ -437,9 +400,6 @@ export async function getAvailabilityForAnime(animeId: string) {
 }
 
 export async function getWatchOrder(animeId: string) {
-  "use cache";
-  cacheTag("anime", `watch-order:${animeId}`);
-  cacheLife("hours");
 
   const db = getDb();
   const rows = await db

@@ -2,9 +2,6 @@ import { getTranslations } from "next-intl/server";
 import { signInWithGoogle } from "@/actions/auth";
 import { preparePage } from "@/lib/page";
 
-// Renders per request (see preparePage), so instant-navigation validation is opted out.
-export const instant = false;
-
 const KNOWN_ERRORS = ["not_configured", "oauth_failed"] as const;
 
 export default async function LoginPage({ params, searchParams }: PageProps<"/[locale]/login">) {

@@ -6,9 +6,6 @@ import { inputClass, primaryClass } from "@/components/admin/styles";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getCurrentUser, isAdmin } from "@/lib/session";
 
-// Reads the session and data per request, so instant-navigation validation is opted out.
-export const instant = false;
-
 // Adding a title only needs its AniList id. Names, format, episodes and covers come from AniList,
 // and the new title stays a draft until an admin publishes it from the list.
 export default async function AdminNewAnimePage() {

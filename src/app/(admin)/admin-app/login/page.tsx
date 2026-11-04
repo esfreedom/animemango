@@ -6,9 +6,6 @@ import { ADMIN_LOCALE, inputClass } from "@/components/admin/styles";
 import { isPasswordLoginEnabled } from "@/lib/admin-password";
 import { isAuthConfigured } from "@/lib/supabase/server";
 
-// Reads the session and data per request, so instant-navigation validation is opted out.
-export const instant = false;
-
 const KNOWN_ERRORS = ["invalid", "too_many", "disabled", "not_configured", "oauth_failed"] as const;
 
 // Google sign-in is offered whenever Supabase is configured. The password form only exists

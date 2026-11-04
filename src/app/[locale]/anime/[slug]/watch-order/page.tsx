@@ -7,9 +7,6 @@ import { getAnimeBySlug, getWatchOrder } from "@/data/catalog";
 import { preparePage } from "@/lib/page";
 import { resolveTitle } from "@/lib/titles";
 
-// Renders per request (see preparePage), so instant-navigation validation is opted out.
-export const instant = false;
-
 export default async function WatchOrderPage({ params }: PageProps<"/[locale]/anime/[slug]/watch-order">) {
   const locale = await preparePage(params);
   const { slug } = await params;

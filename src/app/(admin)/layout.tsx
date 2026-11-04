@@ -6,9 +6,6 @@ import { getCurrentUser } from "@/lib/session";
 import { themeScript } from "@/lib/theme";
 import "../globals.css";
 
-// Reads the session and data per request, so instant-navigation validation is opted out.
-export const instant = false;
-
 const latin = Inter({ variable: "--font-latin", subsets: ["latin"], display: "swap" });
 const thai = Noto_Sans_Thai({ variable: "--font-thai", subsets: ["thai"], display: "swap" });
 

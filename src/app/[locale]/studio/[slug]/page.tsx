@@ -15,9 +15,6 @@ import { studioDisplayName } from "@/lib/studio-name";
 
 type Props = PageProps<"/[locale]/studio/[slug]">;
 
-// Renders per request (see preparePage), so instant-navigation validation is opted out.
-export const instant = false;
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
